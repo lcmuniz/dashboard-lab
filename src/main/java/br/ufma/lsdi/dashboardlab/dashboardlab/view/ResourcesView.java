@@ -1,28 +1,21 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
-import br.ufma.lsdi.dashboardlab.dashboardlab.service.ResourceService;
+import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.navigator.View;
 import com.vaadin.ui.*;
 
-import java.util.List;
+public class ResourcesView extends VerticalLayout {
 
-@SpringUI(path="/resources")
-public class ResourceUI extends UI {
-
-    private ResourceService resourceService;
+    private InterSCityService interSCityService;
 
     private Grid<Resource> resourceGrid;
 
-    public ResourceUI(ResourceService resourceService) {
-        this.resourceService = resourceService;
-    }
+    public ResourcesView(InterSCityService interSCityService) {
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
+        this.interSCityService = interSCityService;
 
         Label titleLabel = new Label("Resources");
         titleLabel.addStyleName("h2");
@@ -63,27 +56,23 @@ public class ResourceUI extends UI {
         horizontalLayout.addComponentsAndExpand(searchTextField);
         horizontalLayout.addComponent(searchButton);
 
-        VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.addComponents(titleLabel, horizontalLayout, resourceGrid);
-
-        setSizeFull();
-        setContent(verticalLayout);
+        addComponents(titleLabel, horizontalLayout, resourceGrid);
 
         search("");
-
     }
 
     private void search(String value) {
         if (value.equals("")) {
-            resourceGrid.setItems(resourceService.findAll());
+            resourceGrid.setItems(interSCityService.findAll());
         }
         else {
             resourceGrid.setItems(
-                    resourceService.findAll()
-                        .stream()
-                        .filter(resource -> resource.getDescription().toLowerCase().contains(value.toLowerCase()))
+                    interSCityService.findAll()
+                            .stream()
+                            .filter(resource -> resource.getDescription().toLowerCase().contains(value.toLowerCase()))
             );
         }
 
     }
+
 }

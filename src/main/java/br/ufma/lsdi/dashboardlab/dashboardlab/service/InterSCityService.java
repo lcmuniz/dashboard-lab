@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
-public class ResourceService {
+public class InterSCityService {
 
     RestTemplate restTemplate = new RestTemplate();
 
