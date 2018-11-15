@@ -13,7 +13,7 @@ public class IndexView extends VerticalLayout {
         Label titleLabel = new Label("Dashboard");
 
         titleLabel.addStyleName("h2");
-        
+
         addComponent(titleLabel);
 
     }

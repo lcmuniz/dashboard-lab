@@ -12,6 +12,9 @@ Este é um projeto em desenvolvimento. Novas funcionalidades serão adicionadas 
 
 Atualmente as funcionalidades implementadas são:
 
-* Listagem de todos os recursos da plataforma: http://&lt;url-da-aplicacao>:8080/resources
+* Listagem de todos os recursos da plataforma.
 
+* Listagem de todos os recursos com capacidades sensores da plataforma.
+
+* Listagem de todos os recursos com capacidades atuadores da plataforma.
 
