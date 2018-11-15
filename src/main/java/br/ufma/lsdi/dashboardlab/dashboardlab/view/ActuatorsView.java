@@ -2,20 +2,19 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 
-public class ResourcesView extends AbstractResourcesView {
+public class ActuatorsView extends AbstractResourcesView {
 
-    public ResourcesView(InterSCityService interSCityService) {
-        super(interSCityService, "Resources");
+    public ActuatorsView(InterSCityService interSCityService) {
+        super(interSCityService, "Actuators");
     }
 
-    @Override
-    protected void search(String value) {
+    protected  void search(String value) {
         if (value.equals("")) {
             resourceGrid.setItems(interSCityService.findAllResources());
         }
         else {
             resourceGrid.setItems(
-                    interSCityService.findAllResources()
+                    interSCityService.findAllActuators()
                             .stream()
                             .filter(resource -> resource.getDescription().toLowerCase().contains(value.toLowerCase()))
             );

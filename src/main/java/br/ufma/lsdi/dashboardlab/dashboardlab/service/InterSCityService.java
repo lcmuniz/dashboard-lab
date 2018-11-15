@@ -14,8 +14,18 @@ public class InterSCityService {
 
     String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
 
-    public List<Resource> findAll() {
+    public List<Resource> findAllResources() {
         String url = baseUrl + "/catalog/resources";
+        return restTemplate.getForObject(url, Resources.class).getResources();
+    }
+
+    public List<Resource> findAllSensors() {
+        String url = baseUrl + "/catalog/resources/sensors";
+        return restTemplate.getForObject(url, Resources.class).getResources();
+    }
+
+    public List<Resource> findAllActuators() {
+        String url = baseUrl + "/catalog/resources/actuators";
         return restTemplate.getForObject(url, Resources.class).getResources();
     }
 
