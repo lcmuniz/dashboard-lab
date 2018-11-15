@@ -13,6 +13,7 @@ public class InterSCityService {
     RestTemplate restTemplate = new RestTemplate();
 
     String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
+    //String baseUrl = "http://playground.interscity.org/";
 
     public List<Resource> findAllResources() {
         String url = baseUrl + "/catalog/resources";

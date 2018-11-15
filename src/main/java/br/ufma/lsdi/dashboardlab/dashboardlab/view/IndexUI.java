@@ -26,6 +26,9 @@ public class IndexUI extends UI {
 
         contentPanel = new Panel();
         contentPanel.setSizeFull();
+
+        contentPanel.setContent(new IndexView(interSCityService));
+
         ApplicationMenuBar applicationMenuBar = new ApplicationMenuBar(interSCityService, contentPanel);
 
         VerticalLayout verticalLayout = new VerticalLayout();
