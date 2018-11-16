@@ -13,7 +13,7 @@ import com.vaadin.ui.VerticalLayout;
 @SpringUI(path = "/")
 public class IndexUI extends UI {
 
-    Panel contentPanel;
+    private Panel contentPanel;
 
     private InterSCityService interSCityService;
 
@@ -27,9 +27,9 @@ public class IndexUI extends UI {
         contentPanel = new Panel();
         contentPanel.setSizeFull();
 
-        contentPanel.setContent(new IndexView(interSCityService));
+        contentPanel.setContent(new IndexView(interSCityService, this));
 
-        ApplicationMenuBar applicationMenuBar = new ApplicationMenuBar(interSCityService, contentPanel);
+        ApplicationMenuBar applicationMenuBar = new ApplicationMenuBar(interSCityService, contentPanel,  this);
 
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setMargin(false);
@@ -37,6 +37,10 @@ public class IndexUI extends UI {
         verticalLayout.addComponents(applicationMenuBar, contentPanel);
         setContent(verticalLayout);
 
+    }
+
+    public Panel getContentPanel() {
+        return contentPanel;
     }
 
 }

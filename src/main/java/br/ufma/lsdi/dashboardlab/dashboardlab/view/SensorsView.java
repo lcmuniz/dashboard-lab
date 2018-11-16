@@ -8,8 +8,8 @@ import com.vaadin.ui.*;
 
 public class SensorsView extends AbstractResourcesView {
 
-    public SensorsView(InterSCityService interSCityService) {
-        super(interSCityService, "Sensors");
+    public SensorsView(InterSCityService interSCityService, IndexUI indexUI) {
+        super(interSCityService, "Sensors", indexUI);
     }
 
     protected  void search(String value) {

@@ -1,11 +1,12 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resources;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class InterSCityService {
@@ -28,6 +29,27 @@ public class InterSCityService {
     public List<Resource> findAllActuators() {
         String url = baseUrl + "/catalog/resources/actuators";
         return restTemplate.getForObject(url, Resources.class).getResources();
+    }
+
+    public Resource findResource(String uuid) {
+        String url = baseUrl + "catalog/resources/{uuid}";
+        Map<String, String> params = new HashMap<>();
+        params.put("uuid", uuid);
+        ResourceData resourceData = restTemplate.getForObject(url, ResourceData.class, params);
+        return resourceData.getData();
+    }
+
+    public List<Capability> findAllCapabilities() {
+        String url = baseUrl + "/catalog/capabilities";
+        return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
+    }
+
+    public Capability findCapability(String name) {
+        String url = baseUrl + "catalog/capabilities/{name}";
+        Map<String, String> params = new HashMap<>();
+        params.put("name", name);
+        Capability capability= restTemplate.getForObject(url, Capability.class, params);
+        return capability;
     }
 
 }

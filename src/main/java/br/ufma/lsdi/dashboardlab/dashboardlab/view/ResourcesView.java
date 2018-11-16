@@ -4,8 +4,8 @@ import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 
 public class ResourcesView extends AbstractResourcesView {
 
-    public ResourcesView(InterSCityService interSCityService) {
-        super(interSCityService, "Resources");
+    public ResourcesView(InterSCityService interSCityService, IndexUI indexUI) {
+        super(interSCityService, "Resources", indexUI);
     }
 
     @Override

@@ -4,8 +4,8 @@ import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 
 public class ActuatorsView extends AbstractResourcesView {
 
-    public ActuatorsView(InterSCityService interSCityService) {
-        super(interSCityService, "Actuators");
+    public ActuatorsView(InterSCityService interSCityService, IndexUI indexUI) {
+        super(interSCityService, "Actuators", indexUI);
     }
 
     protected  void search(String value) {
