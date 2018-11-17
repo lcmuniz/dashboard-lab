@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class ResourceView extends VerticalLayout {
 
-    public ResourceView(InterSCityService interSCityService, IndexUI indexUI, AbstractResourcesView backView, String uuid) {
+    public ResourceView(InterSCityService interSCityService, IndexUI indexUI, VerticalLayout backView, String uuid) {
 
         Resource resource = interSCityService.findResource(uuid);
         Label titleLabel = new Label("Resource");
@@ -17,6 +17,7 @@ public class ResourceView extends VerticalLayout {
 
         TextField idTextField = new TextField("ID");
         TextField uuidTextField = new TextField("UUID");
+        TextField uriTextField = new TextField("URI");
         TextField descriptionTextField = new TextField("Description");
         TextField capabilitiesTextField = new TextField("Capabilities");
         TextField createAtTextField = new TextField("Created at");
@@ -28,9 +29,11 @@ public class ResourceView extends VerticalLayout {
         TextField stateTextField = new TextField("State");
         TextField postalCodeTextField = new TextField("Postal Code");
         TextField statusTextField = new TextField("Status");
+        TextField collectIntervalTextField = new TextField("Collect Interval");
 
         idTextField.setReadOnly(true);
         uuidTextField.setReadOnly(true);
+        uriTextField.setReadOnly(true);
         descriptionTextField.setReadOnly(true);
         capabilitiesTextField.setReadOnly(true);
         createAtTextField.setReadOnly(true);
@@ -42,9 +45,11 @@ public class ResourceView extends VerticalLayout {
         stateTextField.setReadOnly(true);
         postalCodeTextField.setReadOnly(true);
         statusTextField.setReadOnly(true);
+        collectIntervalTextField.setReadOnly(true);
 
         idTextField.setValue(String.valueOf(resource.getId()));
         uuidTextField.setValue(resource.getUuid());
+        uriTextField.setValue(Option.of(resource.getUri()).getOrElse(""));
         descriptionTextField.setValue(resource.getDescription());
         capabilitiesTextField.setValue(resource.getCapabilities().toString());
         createAtTextField.setValue(String.valueOf(resource.getCreatedAt()));
@@ -56,6 +61,7 @@ public class ResourceView extends VerticalLayout {
         stateTextField.setValue(Option.of(resource.getState()).getOrElse(""));
         postalCodeTextField.setValue(Option.of(resource.getPostalCode()).getOrElse(""));
         statusTextField.setValue(resource.getStatus());
+        collectIntervalTextField.setValue(String.valueOf(resource.getCollectInterval()));
 
         Button backButton = new Button("Back");
         backButton.addClickListener(e -> {
@@ -64,12 +70,12 @@ public class ResourceView extends VerticalLayout {
 
         addComponents(
                 titleLabel,
-                new HorizontalLayout(idTextField, uuidTextField),
+                new HorizontalLayout(idTextField, uuidTextField, uriTextField),
                 descriptionTextField,
                 capabilitiesTextField,
                 new HorizontalLayout(latitudeTextField, longitudeTextField),
                 new HorizontalLayout(cityTextField, neighborhoodTextField, stateTextField, postalCodeTextField),
-                new HorizontalLayout(statusTextField, createAtTextField, updatedAtTextField),
+                new HorizontalLayout(statusTextField, createAtTextField, updatedAtTextField, collectIntervalTextField),
                 backButton);
 
     }

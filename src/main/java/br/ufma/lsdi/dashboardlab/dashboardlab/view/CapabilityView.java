@@ -8,7 +8,7 @@ import io.vavr.control.Option;
 
 public class CapabilityView extends VerticalLayout {
 
-    public CapabilityView(InterSCityService interSCityService, IndexUI indexUI, CapabilitiesView backView, String name) {
+    public CapabilityView(InterSCityService interSCityService, IndexUI indexUI, AbstractCapabilitiesView backView, String name) {
 
         Capability capability = interSCityService.findCapability(name);
         Label titleLabel = new Label("Capability");

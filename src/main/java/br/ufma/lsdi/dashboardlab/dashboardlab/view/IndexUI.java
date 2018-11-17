@@ -8,11 +8,13 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import lombok.Getter;
 
 @Theme("valo")
 @SpringUI(path = "/")
 public class IndexUI extends UI {
 
+    @Getter
     private Panel contentPanel;
 
     private InterSCityService interSCityService;
@@ -37,10 +39,6 @@ public class IndexUI extends UI {
         verticalLayout.addComponents(applicationMenuBar, contentPanel);
         setContent(verticalLayout);
 
-    }
-
-    public Panel getContentPanel() {
-        return contentPanel;
     }
 
 }

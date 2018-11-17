@@ -9,15 +9,15 @@ import com.vaadin.ui.*;
 import java.util.List;
 import java.util.Optional;
 
-public class CapabilitiesView extends  AbstractCapabilitiesView {
+public class SensorCapabilitiesView extends AbstractCapabilitiesView {
 
-    public CapabilitiesView(InterSCityService interSCityService, IndexUI indexUI) {
-        super(interSCityService, indexUI, "Capabilities");
+    public SensorCapabilitiesView(InterSCityService interSCityService, IndexUI indexUI) {
+        super(interSCityService, indexUI, "Sensor Capabilities");
     }
 
     @Override
     protected List<Capability> find() {
-        return interSCityService.findAllCapabilities();
+        return interSCityService.findAllSensorCapabilities();
     }
 
 }

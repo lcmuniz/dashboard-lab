@@ -28,6 +28,8 @@ public class Resource {
     @JsonFormat(pattern = "YYYY-mm-dd")
     LocalDate updatedAt;
     Long id;
+    Long collectInterval;
+    String uri;
 
     public void setCapabilities(String[] capabilities) {
         this.capabilities = Arrays.stream(capabilities).map(c -> new Capability(c)).collect(Collectors.toList());

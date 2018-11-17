@@ -2,20 +2,20 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
-import com.vaadin.event.MouseEvents;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.ui.*;
 
+import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractResourcesView extends VerticalLayout {
+public abstract class AbstractSAResourcesView extends VerticalLayout {
 
     protected InterSCityService interSCityService;
 
-    protected Grid<Resource> resourceGrid;
+    private Grid<Resource> resourceGrid;
 
-    public AbstractResourcesView(InterSCityService interSCityService, String title, IndexUI indexUI) {
+    public AbstractSAResourcesView(InterSCityService interSCityService, String title, IndexUI indexUI) {
 
         this.interSCityService = interSCityService;
 
@@ -40,6 +40,7 @@ public abstract class AbstractResourcesView extends VerticalLayout {
         resourceGrid.setSizeFull();
         resourceGrid.addColumn(Resource::getId).setCaption("ID");
         resourceGrid.addColumn(Resource::getUuid).setCaption("UUID");
+        resourceGrid.addColumn(Resource::getUri).setCaption("URI");
         resourceGrid.addColumn(Resource::getDescription).setCaption("Description");
         resourceGrid.addColumn(Resource::getCapabilities).setCaption("Capabilities");
         resourceGrid.addColumn(Resource::getCreatedAt).setCaption("Created at");
@@ -51,6 +52,7 @@ public abstract class AbstractResourcesView extends VerticalLayout {
         resourceGrid.addColumn(Resource::getState).setCaption("State");
         resourceGrid.addColumn(Resource::getPostalCode).setCaption("Postal Code");
         resourceGrid.addColumn(Resource::getStatus).setCaption("Status");
+        resourceGrid.addColumn(Resource::getCollectInterval).setCaption("Collect Interval");
 
         resourceGrid.addItemClickListener(e -> {
             if(e.getMouseEventDetails().isDoubleClick()) {
@@ -70,8 +72,26 @@ public abstract class AbstractResourcesView extends VerticalLayout {
         addComponents(titleLabel, horizontalLayout, resourceGrid);
 
         search("");
+
     }
 
-    protected abstract void search(String value);
+    private void search(String value) {
+        List<Resource> actuators = findAll();
+        if (value.equals("")) {
+            resourceGrid.setItems(actuators);
+        }
+        else {
+            resourceGrid.setItems(
+                    actuators.stream()
+                            .filter(actuator -> {
+                                String description = actuator.getDescription() == null ? "" : actuator.getDescription().toLowerCase();
+                                return description.contains(value.toLowerCase());
+                            })
+            );
+        }
+
+    }
+
+    protected abstract List<Resource> findAll();
 
 }

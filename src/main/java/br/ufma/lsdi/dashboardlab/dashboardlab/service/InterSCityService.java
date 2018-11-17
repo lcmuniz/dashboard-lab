@@ -1,9 +1,11 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +23,12 @@ public class InterSCityService {
         return restTemplate.getForObject(url, Resources.class).getResources();
     }
 
-    public List<Resource> findAllSensors() {
+    public List<Resource> findAllSensorResources() {
         String url = baseUrl + "/catalog/resources/sensors";
         return restTemplate.getForObject(url, Resources.class).getResources();
     }
 
-    public List<Resource> findAllActuators() {
+    public List<Resource> findAllActuatorResources() {
         String url = baseUrl + "/catalog/resources/actuators";
         return restTemplate.getForObject(url, Resources.class).getResources();
     }
@@ -44,12 +46,39 @@ public class InterSCityService {
         return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
     }
 
+    public List<Capability> findAllSensorCapabilities() {
+        String url = baseUrl + "/catalog/capabilities?capability_type=sensor";
+        return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
+    }
+
+    public List<Capability> findAllActuatorCapabilities() {
+        String url = baseUrl + "/catalog/capabilities?capability_type=actuator";
+        return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
+    }
+
     public Capability findCapability(String name) {
         String url = baseUrl + "catalog/capabilities/{name}";
         Map<String, String> params = new HashMap<>();
         params.put("name", name);
-        Capability capability= restTemplate.getForObject(url, Capability.class, params);
-        return capability;
+        return restTemplate.getForObject(url, Capability.class, params);
     }
 
+    public List<Resource> findAllResourcesByParams(Map<String, String> params) {
+        String url = baseUrl + "catalog/resources/search?";
+
+        List<String> lst = new ArrayList<>();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            lst.add(entry.getKey() + "=" + entry.getValue());
+        }
+        String p = String.join("&", lst);
+        url += p;
+
+        return restTemplate.getForObject(url, Resources.class).getResources();
+    }
+
+    public List<Resource> findAllData(PostDataCollector pdc) {
+        String url = baseUrl + "collector/resources/data";
+        HttpEntity<PostDataCollector> request = new HttpEntity<>(pdc);
+        return restTemplate.postForObject(url, request, Resources.class).getResources();
+    }
 }

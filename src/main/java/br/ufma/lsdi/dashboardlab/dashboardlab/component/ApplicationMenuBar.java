@@ -9,25 +9,42 @@ public class ApplicationMenuBar extends MenuBar {
 
     public ApplicationMenuBar(InterSCityService interSCityService, Panel contentPanel, IndexUI indexUI) {
 
-        MenuItem viewMenuItem = addItem("View", null, null);
-        MenuItem indexMenuItem = viewMenuItem.addItem("Home", null, c -> {
+        MenuItem resourcesMenuItem = addItem("Resources", null, null);
+        resourcesMenuItem.addItem("Home", null, c -> {
             contentPanel.setContent(new IndexView(interSCityService, indexUI));
         });
-        MenuItem resourcesMenuItem = viewMenuItem.addItem("All Resources", null, c -> {
+        resourcesMenuItem.addItem("All Resources", null, c -> {
             contentPanel.setContent(new ResourcesView(interSCityService, indexUI));
         });
-        MenuItem sensorsMenuItem = viewMenuItem.addItem("All Sensors", null, c -> {
-            contentPanel.setContent(new SensorsView(interSCityService, indexUI));
+        resourcesMenuItem.addItem("All Resources w/ Sensors", null, c -> {
+            contentPanel.setContent(new SensorResourcesView(interSCityService, indexUI));
         });
-        MenuItem actuatorsMenuItem = viewMenuItem.addItem("All Actuators", null, c -> {
-            contentPanel.setContent(new ActuatorsView(interSCityService, indexUI));
+        resourcesMenuItem.addItem("All Resources w/ Actuators", null, c -> {
+            contentPanel.setContent(new ActuatorResourcesView(interSCityService, indexUI));
         });
-        MenuItem capabilitiesMenuItem = viewMenuItem.addItem("All Capabilities", null, c -> {
+        resourcesMenuItem.addSeparator();
+        resourcesMenuItem.addItem("Exit", null, null);
+
+        MenuItem capabilitiesMenuItem = addItem("Capabilities", null, null);
+        capabilitiesMenuItem.addItem("All Capabilities", null, c -> {
             contentPanel.setContent(new CapabilitiesView(interSCityService, indexUI));
         });
-        viewMenuItem.addSeparator();
-        MenuItem exitMenuItem = viewMenuItem.addItem("Exit", null, null);
+        capabilitiesMenuItem.addItem("All Sensor Capabilities", null, c -> {
+            contentPanel.setContent(new SensorCapabilitiesView(interSCityService, indexUI));
+        });
+        capabilitiesMenuItem.addItem("All Actuator Capabilities", null, c -> {
+            contentPanel.setContent(new ActuatorCapabilitiesView(interSCityService, indexUI));
+        });
 
+        MenuItem dataMenuItem = addItem("Data", null, null);
+        dataMenuItem.addItem("All Data", null, c -> {
+            contentPanel.setContent(new DataView(interSCityService, indexUI));
+        });
+        dataMenuItem.addItem("Most Recent Data", null, c -> {
+            contentPanel.setContent(new DataView(interSCityService, indexUI));
+        });
+
+        setSizeFull();
     }
 
 }
