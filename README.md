@@ -18,3 +18,10 @@ Atualmente as funcionalidades implementadas são:
 
 * Listagem de todos os recursos com capacidades atuadores da plataforma.
 
+* Listagem de todas as capacidades da plataforma
+
+* Listagem de todas as capacidades do tipo sensor
+
+* Listagem de todas as capacidades do tipo atuador
+
+* Listagem dos dados de contexto
