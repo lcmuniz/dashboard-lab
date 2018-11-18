@@ -6,15 +6,13 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Data
 public class Resource {
 
     String uuid;
     String description;
-    List<Capability> capabilities;
+    String[] capabilities;
     String status;
     Double lat;
     Double lon;
@@ -31,7 +29,8 @@ public class Resource {
     Long collectInterval;
     String uri;
 
-    public void setCapabilities(String[] capabilities) {
-        this.capabilities = Arrays.stream(capabilities).map(c -> new Capability(c)).collect(Collectors.toList());
+    public List<String> getCapabilitiesAsList() {
+        return Arrays.asList(capabilities);
     }
+
 }

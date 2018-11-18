@@ -1,12 +1,16 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
+import com.google.gson.Gson;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import lombok.val;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,67 +22,167 @@ public class InterSCityService {
     String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
     //String baseUrl = "http://playground.interscity.org/";
 
+    Gson gson = new Gson();
+
     public List<Resource> findAllResources() {
-        String url = baseUrl + "/catalog/resources";
-        return restTemplate.getForObject(url, Resources.class).getResources();
+        try {
+            val url = baseUrl + "/catalog/resources";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _resources = gson.fromJson(json, Resources.class);
+            val resources = _resources.getResources();
+            return resources;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Resource> findAllSensorResources() {
-        String url = baseUrl + "/catalog/resources/sensors";
-        return restTemplate.getForObject(url, Resources.class).getResources();
+        try {
+            val url = baseUrl + "/catalog/resources/sensors";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _resources = gson.fromJson(json, Resources.class);
+            val resources = _resources.getResources();
+            return resources;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Resource> findAllActuatorResources() {
-        String url = baseUrl + "/catalog/resources/actuators";
-        return restTemplate.getForObject(url, Resources.class).getResources();
+        try {
+            val url = baseUrl + "/catalog/resources/actuators";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _resources = gson.fromJson(json, Resources.class);
+            val resources = _resources.getResources();
+            return resources;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Resource findResource(String uuid) {
-        String url = baseUrl + "catalog/resources/{uuid}";
-        Map<String, String> params = new HashMap<>();
-        params.put("uuid", uuid);
-        ResourceData resourceData = restTemplate.getForObject(url, ResourceData.class, params);
-        return resourceData.getData();
+
+        try {
+            val url = baseUrl + "catalog/resources/{uuid}";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .routeParam("uuid", uuid)
+                    .asJson().getBody().toString();
+            val resourceData = gson.fromJson(json, ResourceData.class);
+            val resource = resourceData.getData();
+            return resource;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<Capability> findAllCapabilities() {
-        String url = baseUrl + "/catalog/capabilities";
-        return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
+        try {
+            val url = baseUrl + "/catalog/capabilities";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _capabilities = gson.fromJson(json, Capabilities.class);
+            val capabilities = _capabilities.getCapabilities();
+            return capabilities;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Capability> findAllSensorCapabilities() {
-        String url = baseUrl + "/catalog/capabilities?capability_type=sensor";
-        return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
+        try {
+            val url = baseUrl + "/catalog/capabilities?capability_type=sensor";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _capabilities = gson.fromJson(json, Capabilities.class);
+            val capabilities = _capabilities.getCapabilities();
+            return capabilities;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Capability> findAllActuatorCapabilities() {
-        String url = baseUrl + "/catalog/capabilities?capability_type=actuator";
-        return restTemplate.getForObject(url, Capabilities.class).getCapabilities();
+        try {
+            val url = baseUrl + "/catalog/capabilities?capability_type=actuator";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _capabilities = gson.fromJson(json, Capabilities.class);
+            val capabilities = _capabilities.getCapabilities();
+            return capabilities;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Capability findCapability(String name) {
-        String url = baseUrl + "catalog/capabilities/{name}";
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        return restTemplate.getForObject(url, Capability.class, params);
+        try {
+            val url = baseUrl + "catalog/capabilities/{name}";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .routeParam("name", name)
+                    .asJson().getBody().toString();
+            val capability = gson.fromJson(json, Capability.class);
+            return capability;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Resource> findAllResourcesByParams(Map<String, String> params) {
-        String url = baseUrl + "catalog/resources/search?";
+        try {
+            val lst = new ArrayList<String>();
+            for (val entry : params.entrySet()) {
+                lst.add(entry.getKey() + "=" + entry.getValue());
+            }
+            val p = String.join("&", lst);
+            val url = baseUrl + "catalog/resources/search?" + p;
 
-        List<String> lst = new ArrayList<>();
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            lst.add(entry.getKey() + "=" + entry.getValue());
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _resources = gson.fromJson(json, Resources.class);
+            val resources = _resources.getResources();
+            return resources;
         }
-        String p = String.join("&", lst);
-        url += p;
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-        return restTemplate.getForObject(url, Resources.class).getResources();
     }
 
     public List<Resource> findAllData(PostDataCollector pdc) {
-        String url = baseUrl + "collector/resources/data";
-        HttpEntity<PostDataCollector> request = new HttpEntity<>(pdc);
-        return restTemplate.postForObject(url, request, Resources.class).getResources();
+
+        try {
+            val url = baseUrl + "collector/resources/data";
+            String post = gson.toJson(pdc);
+            val json = Unirest.post(url)
+                    .body(post).asJson().getBody().toString();
+            val _resources = gson.fromJson(json, Resources.class);
+            val resources = _resources.getResources();
+            return resources;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

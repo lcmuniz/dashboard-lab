@@ -22,7 +22,7 @@ public class DataView extends VerticalLayout {
     private DateField startDate;
     private DateField endDate;
 
-    Label label;
+    Grid<Resource> resourceGrid;
 
     public DataView(InterSCityService interSCityService, IndexUI indexUI) {
 
@@ -99,7 +99,7 @@ public class DataView extends VerticalLayout {
         }
 
         List<Resource> resources = interSCityService.findAllData(pdc);
-        label.setValue(resources.size()+"...");
+        resourceGrid.setItems(resources);
 
     }
 
@@ -145,8 +145,26 @@ public class DataView extends VerticalLayout {
     }
 
     private VerticalLayout tab2() {
-        label = new Label("oi");
-        return new VerticalLayout(label);
+
+        resourceGrid = new Grid<>();
+        resourceGrid.setSizeFull();
+        resourceGrid.addColumn(Resource::getId).setCaption("ID");
+        resourceGrid.addColumn(Resource::getUuid).setCaption("UUID");
+        resourceGrid.addColumn(Resource::getUri).setCaption("URI");
+        resourceGrid.addColumn(Resource::getDescription).setCaption("Description");
+        resourceGrid.addColumn(Resource::getCapabilitiesAsList).setCaption("Capabilities");
+        resourceGrid.addColumn(Resource::getCreatedAt).setCaption("Created at");
+        resourceGrid.addColumn(Resource::getUpdatedAt).setCaption("Updated at");
+        resourceGrid.addColumn(Resource::getLat).setCaption("Latitude");
+        resourceGrid.addColumn(Resource::getLon).setCaption("Longitude");
+        resourceGrid.addColumn(Resource::getCity).setCaption("City");
+        resourceGrid.addColumn(Resource::getNeighborhood).setCaption("Neighborhood");
+        resourceGrid.addColumn(Resource::getState).setCaption("State");
+        resourceGrid.addColumn(Resource::getPostalCode).setCaption("Postal Code");
+        resourceGrid.addColumn(Resource::getStatus).setCaption("Status");
+        resourceGrid.addColumn(Resource::getCollectInterval).setCaption("Collect Interval");
+
+        return new VerticalLayout(resourceGrid);
     }
 
 }

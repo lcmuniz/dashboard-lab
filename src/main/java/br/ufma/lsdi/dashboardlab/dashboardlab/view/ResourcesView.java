@@ -50,7 +50,7 @@ public class ResourcesView extends VerticalLayout {
         resourceGrid.addColumn(Resource::getUuid).setCaption("UUID");
         resourceGrid.addColumn(Resource::getUri).setCaption("URI");
         resourceGrid.addColumn(Resource::getDescription).setCaption("Description");
-        resourceGrid.addColumn(Resource::getCapabilities).setCaption("Capabilities");
+        resourceGrid.addColumn(Resource::getCapabilitiesAsList).setCaption("Capabilities");
         resourceGrid.addColumn(Resource::getCreatedAt).setCaption("Created at");
         resourceGrid.addColumn(Resource::getUpdatedAt).setCaption("Updated at");
         resourceGrid.addColumn(Resource::getLat).setCaption("Latitude");
