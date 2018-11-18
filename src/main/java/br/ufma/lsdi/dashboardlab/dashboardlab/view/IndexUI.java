@@ -3,15 +3,19 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.ApplicationMenuBar;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.vaadin.annotations.Theme;
+import com.vaadin.annotations.Widgetset;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 import lombok.Getter;
+import org.vaadin.addon.leaflet.LMap;
+import org.vaadin.addon.leaflet.LMarker;
+import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
+import org.vaadin.addon.leaflet.markercluster.LMarkerClusterGroup;
 
-@Theme("valo")
 @SpringUI(path = "/")
+@Theme("valo")
+@Widgetset("br.ufma.lsdi.dashboardlab.dashboardlab.LeafletWidgetset")
 public class IndexUI extends UI {
 
     @Getter
@@ -32,12 +36,19 @@ public class IndexUI extends UI {
         contentPanel.setContent(new IndexView(interSCityService, this));
 
         ApplicationMenuBar applicationMenuBar = new ApplicationMenuBar(interSCityService, contentPanel,  this);
+        applicationMenuBar.setHeightUndefined();
 
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setMargin(false);
         verticalLayout.setSpacing(false);
-        verticalLayout.addComponents(applicationMenuBar, contentPanel);
+        verticalLayout.setWidth("100%");
+        verticalLayout.setHeight("100%");
+        verticalLayout.addComponent(applicationMenuBar);
+        verticalLayout.addComponent(contentPanel);
+        verticalLayout.setExpandRatio(contentPanel, 1);
+
         setContent(verticalLayout);
+        setHeight("100%");
 
     }
 

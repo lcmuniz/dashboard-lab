@@ -1,7 +1,6 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.Capability;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.vaadin.ui.*;
 import io.vavr.control.Option;

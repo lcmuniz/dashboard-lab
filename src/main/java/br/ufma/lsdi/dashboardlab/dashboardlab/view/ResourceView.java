@@ -5,8 +5,6 @@ import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.vaadin.ui.*;
 import io.vavr.control.Option;
 
-import java.util.Optional;
-
 public class ResourceView extends VerticalLayout {
 
     public ResourceView(InterSCityService interSCityService, IndexUI indexUI, VerticalLayout backView, String uuid) {

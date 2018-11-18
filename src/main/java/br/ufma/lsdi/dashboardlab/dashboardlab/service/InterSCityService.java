@@ -2,11 +2,8 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
 import com.google.gson.Gson;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import lombok.val;
-import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,6 +24,21 @@ public class InterSCityService {
     public List<Resource> findAllResources() {
         try {
             val url = baseUrl + "/catalog/resources";
+            val json = Unirest.get(url)
+                    .header("accept", "application/json")
+                    .asJson().getBody().toString();
+            val _resources = gson.fromJson(json, Resources.class);
+            val resources = _resources.getResources();
+            return resources;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Resource> findAllResources(int page) {
+        try {
+            val url = baseUrl + "/catalog/resources?page="+page;
             val json = Unirest.get(url)
                     .header("accept", "application/json")
                     .asJson().getBody().toString();
@@ -175,6 +187,7 @@ public class InterSCityService {
             val url = baseUrl + "collector/resources/data";
             String post = gson.toJson(pdc);
             val json = Unirest.post(url)
+                    .header("accept", "application/json")
                     .body(post).asJson().getBody().toString();
             val _resources = gson.fromJson(json, Resources.class);
             val resources = _resources.getResources();

@@ -36,12 +36,17 @@ public class ApplicationMenuBar extends MenuBar {
             contentPanel.setContent(new ActuatorCapabilitiesView(interSCityService, indexUI));
         });
 
-        MenuItem dataMenuItem = addItem("Data", null, null);
-        dataMenuItem.addItem("All Data", null, c -> {
+        MenuItem dataMenuItem = addItem("Context Data", null, null);
+        dataMenuItem.addItem("All Context Data", null, c -> {
             contentPanel.setContent(new DataView(interSCityService, indexUI));
         });
-        dataMenuItem.addItem("Most Recent Data", null, c -> {
+        dataMenuItem.addItem("Most Recent Context Data", null, c -> {
             contentPanel.setContent(new DataView(interSCityService, indexUI));
+        });
+
+        MenuItem mapItem = addItem("Map", null, null);
+        mapItem.addItem("Map View", null, c -> {
+            contentPanel.setContent(new MapView(interSCityService, indexUI));
         });
 
         setSizeFull();

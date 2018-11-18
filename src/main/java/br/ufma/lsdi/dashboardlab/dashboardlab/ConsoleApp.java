@@ -8,16 +8,17 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReaderBuilder;
 import lombok.val;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import java.io.FileReader;
 import java.io.IOException;
 
-//@Component
+@Component
 public class ConsoleApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        update();
+        //update();
     }
 
     private void update() throws IOException {
@@ -55,6 +56,7 @@ public class ConsoleApp implements CommandLineRunner {
                 resource.setCapabilities(capabilities);
                 String put = gson.toJson(resource);
                 val json = Unirest.put(url)
+                        .header("accept", "application/json")
                         .body(put).asJson().getBody().toString();
                 val resourceData = gson.fromJson(json, ResourceData.class);
             }

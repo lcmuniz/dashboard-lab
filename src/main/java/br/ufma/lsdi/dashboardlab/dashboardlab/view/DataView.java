@@ -1,7 +1,6 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.TextListComponent;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Capabilities;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.Capability;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.PostDataCollector;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
