@@ -49,6 +49,11 @@ public class ApplicationMenuBar extends MenuBar {
             contentPanel.setContent(new MapView(interSCityService, indexUI));
         });
 
+        MenuItem chartItem = addItem("Chart", null, null);
+        chartItem.addItem("Line Chart", null, c -> {
+            contentPanel.setContent(new LineChartView(interSCityService, indexUI));
+        });
+
         setSizeFull();
     }
 

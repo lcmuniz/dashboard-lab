@@ -2,7 +2,6 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.component;
 
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;

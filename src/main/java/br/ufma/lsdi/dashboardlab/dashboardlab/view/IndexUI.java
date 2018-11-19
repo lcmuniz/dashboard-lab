@@ -13,6 +13,8 @@ import org.vaadin.addon.leaflet.LMarker;
 import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 import org.vaadin.addon.leaflet.markercluster.LMarkerClusterGroup;
 
+import java.util.List;
+
 @SpringUI(path = "/")
 @Theme("valo")
 @Widgetset("br.ufma.lsdi.dashboardlab.dashboardlab.LeafletWidgetset")

@@ -1,27 +1,30 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
+import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorCapability;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorContextData;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorResource;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorResponse;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.Unirest;
 import lombok.val;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class InterSCityService {
 
-    RestTemplate restTemplate = new RestTemplate();
-
     String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
     //String baseUrl = "http://playground.interscity.org/";
 
-    Gson gson = new Gson();
+    Gson gson = AppGson.get();
 
-    public List<Resource> findAllResources() {
+    public List<Resource> _findAllResources() {
         try {
             val url = baseUrl + "/catalog/resources";
             val json = Unirest.get(url)
@@ -34,6 +37,18 @@ public class InterSCityService {
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<Resource> findAllResources() {
+        int i = 1;
+        List<Resource> resources = new ArrayList<>();
+        while (true) {
+            val page = findAllResources(i);
+            if (page.size() == 0) break;
+            resources.addAll(page);
+            i++;
+        }
+        return resources;
     }
 
     public List<Resource> findAllResources(int page) {
@@ -181,6 +196,64 @@ public class InterSCityService {
 
     }
 
+    public List<Object> findAllDataValue(String uuid, String capability, String contextData) {
+
+        try {
+            PostDataCollector pdc = new PostDataCollector();
+            pdc.setUuids(Arrays.asList(uuid));
+            pdc.setCapabilities(Arrays.asList(capability));
+
+            DataCollectorResponse response = new DataCollectorResponse(findAllData(gson.toJson(pdc)));
+
+            List<Object> list = new ArrayList<>();
+            for (DataCollectorResource dcr : response.getResources()) {
+                for (DataCollectorCapability dcc : dcr.getCapabilities()) {
+                    for (DataCollectorContextData dccd :dcc.getDataList()) {
+                        Map<String, Object> data = dccd.getData();
+                        if (data.get(contextData) != null) {
+                            list.add(data.get(contextData));
+                        }
+                    }
+                }
+            }
+            return list;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public List<List<Object>> findAllDataValue(String uuid, String capability, String[] contextData) {
+
+        try {
+            PostDataCollector pdc = new PostDataCollector();
+            pdc.setUuids(Arrays.asList(uuid));
+            pdc.setCapabilities(Arrays.asList(capability));
+
+            DataCollectorResponse response = new DataCollectorResponse(findAllData(gson.toJson(pdc)));
+
+            List<List<Object>> list = new ArrayList<>();
+            for (DataCollectorResource dcr : response.getResources()) {
+                for (DataCollectorCapability dcc : dcr.getCapabilities()) {
+                    for (DataCollectorContextData dccd :dcc.getDataList()) {
+                        Map<String, Object> data = dccd.getData();
+                        List<Object> list2 = new ArrayList<>();
+                        for (String s : contextData) {
+                            list2.add(data.get(s));
+                        }
+                        list.add(list2);
+                    }
+                }
+            }
+            return list;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     public List<Resource> findAllData(PostDataCollector pdc) {
 
         try {
@@ -188,6 +261,7 @@ public class InterSCityService {
             String post = gson.toJson(pdc);
             val json = Unirest.post(url)
                     .header("accept", "application/json")
+                    .header("Content-Type", "application/json")
                     .body(post).asJson().getBody().toString();
             val _resources = gson.fromJson(json, Resources.class);
             val resources = _resources.getResources();
@@ -198,4 +272,21 @@ public class InterSCityService {
         }
 
     }
+
+    public String findAllData(String json) {
+
+        try {
+            val url = baseUrl + "collector/resources/data";
+            val result = Unirest.post(url)
+                    .header("accept", "application/json")
+                    .header("Content-Type", "application/json")
+                    .body(json).asJson().getBody().toString();
+            return result;
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 }

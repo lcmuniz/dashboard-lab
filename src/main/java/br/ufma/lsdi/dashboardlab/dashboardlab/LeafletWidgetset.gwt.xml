@@ -9,6 +9,8 @@
     <inherits name="org.peimari.gleaflet.GLeaflet"/>
     <inherits name="org.vaadin.gleaflet.markercluster.GLeafletMarkerCluster"/>
 
+    <inherits name="com.vaadin.addon.charts.Widgetset"/>
+
     <set-configuration-property name="devModeRedirectEnabled" value="true" />
 
     <source path="client/"></source>

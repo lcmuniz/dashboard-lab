@@ -118,6 +118,12 @@
             <artifactId>g-leaflet-markercluster</artifactId>
             <version>1.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts</artifactId>
+            <version>4.0.5</version>
+        </dependency>
+
 
     </dependencies>
 

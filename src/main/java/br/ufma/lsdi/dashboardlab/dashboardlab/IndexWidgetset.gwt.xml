@@ -12,4 +12,6 @@
     <inherits name="org.vaadin.addon.leaflet.markercluster.Widgetset" />
 
     <inherits name="org.vaadin.ui.NumberFieldWidgetset" />
+
+    <inherits name="com.vaadin.addon.charts.Widgetset" />
 </module>
