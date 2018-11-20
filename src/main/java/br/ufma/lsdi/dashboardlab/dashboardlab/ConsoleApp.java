@@ -18,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Component
 public class ConsoleApp implements CommandLineRunner {
@@ -29,7 +30,7 @@ public class ConsoleApp implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         //updateResource();
-        find();
+        updateResource();
     }
 
     private void find() {
@@ -52,34 +53,11 @@ public class ConsoleApp implements CommandLineRunner {
         while ((nextRecord = csvReader.readNext()) != null) {
 
             val bairro = nextRecord[0];
-            val uuid = nextRecord[1];
-            val lat = nextRecord[2];
-            val lon = nextRecord[3];
+            val lat = nextRecord[1];
+            val lon = nextRecord[2];
+            val uuid = UUID.randomUUID().toString();
 
-            try {
-                val url = baseUrl + "catalog/resources/{uuid}";
-                Resource resource = new Resource();
-/*
-                resource.setUuid(uuid);
-                resource.setDescription(bairro);
-                resource.setLat(new Double(lat));
-                resource.setLon(new Double(lon));
-                resource.setStatus("active");
-*/
-                String[] capabilities = {"crime_doloso", "crime_culposo"};
-                resource.setCapabilities(capabilities);
-                String put = "{\"data\":" +gson.toJson(resource) + "}";
-                val json = Unirest.put(url)
-                        .header("accept", "application/json")
-                        .header("Content-Type", "application/json")
-                        .body(put).asJson().getBody().toString();
-                val resourceData = gson.fromJson(json, ResourceData.class);
-                System.out.println(resourceData.getData());
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
+            System.out.println(uuid+";"+bairro+";"+lat+";"+lon);
 
         }
 
