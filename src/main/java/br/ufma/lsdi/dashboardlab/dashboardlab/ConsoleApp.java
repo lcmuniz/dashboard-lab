@@ -30,7 +30,7 @@ public class ConsoleApp implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         //updateResource();
-        //updateResource();
+        updateResource();
     }
 
     private void find() {
@@ -41,7 +41,7 @@ public class ConsoleApp implements CommandLineRunner {
 
         val dir = new java.io.File( "." ).getCanonicalPath();
 
-        val fr = new FileReader(dir + "/src/main/resources/static/bairros.csv");
+        val fr = new FileReader(dir + "/src/main/resources/static/crimes_dolosos.csv");
 
         val parser = new CSVParserBuilder().withSeparator(';').build();
         val csvReader = new CSVReaderBuilder(fr).withCSVParser(parser).build();
@@ -55,9 +55,9 @@ public class ConsoleApp implements CommandLineRunner {
             val bairro = nextRecord[0];
             val lat = nextRecord[1];
             val lon = nextRecord[2];
-            val uuid = UUID.randomUUID().toString();
+            val timestamp = nextRecord[3];
 
-            System.out.println(uuid+";"+bairro+";"+lat+";"+lon);
+            System.out.println("crime_doloso;"+lat+";"+lon+";"+timestamp+";"+bairro);
 
         }
 
