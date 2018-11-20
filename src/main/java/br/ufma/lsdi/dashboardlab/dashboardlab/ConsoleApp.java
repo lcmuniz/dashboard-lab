@@ -30,7 +30,7 @@ public class ConsoleApp implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         //updateResource();
-        updateResource();
+        //updateResource();
     }
 
     private void find() {
