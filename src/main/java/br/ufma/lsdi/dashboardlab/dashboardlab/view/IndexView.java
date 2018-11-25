@@ -1,21 +1,13 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
-import br.ufma.lsdi.dashboardlab.dashboardlab.component.TextListComponent;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.*;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.google.gson.Gson;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.VerticalLayout;
 import lombok.val;
-import org.vaadin.addon.leaflet.LMap;
-import org.vaadin.addon.leaflet.LMarker;
-import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
-import org.vaadin.addon.leaflet.markercluster.LMarkerClusterGroup;
-import org.vaadin.ui.NumberField;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class IndexView extends VerticalLayout {
 
@@ -47,35 +39,55 @@ public class IndexView extends VerticalLayout {
 
         VerticalLayout vl = new VerticalLayout();
 
-        Label resourcesLabel = new Label("Resources: ");
+        Label resourcesLabel = new Label("Inde: ");
+
+        Button button = new Button("Teste");
+        button.addClickListener(e -> {
+
+/*
+            DiscoveryResourcesRequest request = new DiscoveryResourcesRequest();
+            request.setCapability("crime_doloso_lc");
+            request.getMatchers().add("name.eq=crime_alemanha");
+*/
+
+
+            /*SearchResourcesRequest request = new SearchResourcesRequest();
+            request.setCapability("crime_doloso_lc");
+            val resources = interSCityService.searchResources(request);
+
+            for(Resource r : resources) {
+                System.out.println(r);
+            }*/
+
+//            val resource = interSCityService.getResource("27752a2a-d4f5-4300-bf69-5d8685a74ab4");
+//            System.out.println(resource);
+
+            val capability = interSCityService.getCapability("crime_doloso_lc");
+            System.out.println(capability);
+
+//            GetContextDataResponse response = interSCityService.getContextData(request);
+//
+//            for(GetDataContextResource r : response.getResources()) {
+//                System.out.println(r.getUuid());
+//                val capabilities = r.getCapabilities();
+//                for (String key : capabilities.keySet()) {
+//                    System.out.println("capability: " + key);
+//                    List<Map<String, Object>> capability = capabilities.get(key);
+//                    for (Map<String, Object> map : capability) {
+//                        for (String key2 : map.keySet()) {
+//                            System.out.println(key2);
+//                            System.out.println(map.get(key2));
+//                        }
+//                    }
+//                }
+//            }
+
+        });
+
         vl.addComponents(resourcesLabel);
+        vl.addComponent(button);
 
         return vl;
     }
-
-    private VerticalLayout createPanel2() {
-
-        VerticalLayout vl = new VerticalLayout();
-
-        Label resourcesLabel = new Label("Resources: ");
-        resourcesLabel.addStyleName("h2");
-        int nr = interSCityService.findAllResources().size();
-        Label numberResources = new Label(nr+"");
-
-        Label capabilitiesLabel = new Label("Capabilities: ");
-        capabilitiesLabel.addStyleName("h2");
-        int nc = interSCityService.findAllCapabilities().size();
-        Label numberCapabilities = new Label(nc+"");
-
-        vl.addComponents(
-                resourcesLabel,
-                numberResources,
-                capabilitiesLabel,
-                numberCapabilities
-        );
-
-        return vl;
-    }
-
 
 }

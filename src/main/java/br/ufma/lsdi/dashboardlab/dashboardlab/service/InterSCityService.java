@@ -1,112 +1,105 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorCapability;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorContextData;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorResource;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.DataCollectorResponse;
+import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.*;
+import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.contextdata.GetContextDataRequest;
+import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.contextdata.GetContextDataResponse;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import io.vavr.control.Option;
 import lombok.val;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class InterSCityService {
 
     String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
-    //String baseUrl = "http://playground.interscity.org/";
 
     Gson gson = AppGson.get();
 
-    public List<Resource> _findAllResources() {
+    // GET /catalog/resources
+    public List<Resource> getAllResources() {
+
         try {
             val url = baseUrl + "/catalog/resources";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _resources = gson.fromJson(json, Resources.class);
-            val resources = _resources.getResources();
-            return resources;
+            return findResources(url);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
-    public List<Resource> findAllResources() {
-        int i = 1;
-        List<Resource> resources = new ArrayList<>();
-        while (true) {
-            val page = findAllResources(i);
-            if (page.size() == 0) break;
-            resources.addAll(page);
-            i++;
-        }
-        return resources;
-    }
+    // GET /catalog/resources/sensors
+    public List<Resource> getAllResourcesWithSensorCapabilities() {
 
-    public List<Resource> findAllResources(int page) {
-        try {
-            val url = baseUrl + "/catalog/resources?page="+page;
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _resources = gson.fromJson(json, Resources.class);
-            val resources = _resources.getResources();
-            return resources;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<Resource> findAllSensorResources() {
         try {
             val url = baseUrl + "/catalog/resources/sensors";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _resources = gson.fromJson(json, Resources.class);
-            val resources = _resources.getResources();
-            return resources;
+            return findResources(url);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
-    public List<Resource> findAllActuatorResources() {
+    // GET /catalog/resources/actuators
+    public List<Resource> getAllResourcesWithActuatorCapabilities() {
+
         try {
             val url = baseUrl + "/catalog/resources/actuators";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _resources = gson.fromJson(json, Resources.class);
-            val resources = _resources.getResources();
-            return resources;
+            return findResources(url);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
-    public Resource findResource(String uuid) {
+    // GET /catalog/resources/search
+    public List<Resource> searchResources(SearchResourcesRequest request) {
 
         try {
-            val url = baseUrl + "catalog/resources/{uuid}";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .routeParam("uuid", uuid)
-                    .asJson().getBody().toString();
-            val resourceData = gson.fromJson(json, ResourceData.class);
-            val resource = resourceData.getData();
-            return resource;
+
+            val lst = new ArrayList<String>();
+
+            if (request.getCapability() != null) lst.add("capability="+request.getCapability());
+            if (request.getLat() != null) lst.add("lat="+request.getLat());
+            if (request.getLon() != null) lst.add("lon="+request.getLon());
+            if (request.getRadius() != null) lst.add("radius="+request.getRadius());
+            if (request.getUuid() != null) lst.add("uuid="+request.getUuid());
+            if (request.getDescription() != null) lst.add("description="+request.getDescription());
+            if (request.getStatus() != null) lst.add("status="+request.getStatus());
+            if (request.getCountry() != null) lst.add("country="+request.getCountry());
+            if (request.getState() != null) lst.add("state="+request.getState());
+            if (request.getCity() != null) lst.add("city="+request.getCity());
+            if (request.getNeighborhood() != null) lst.add("neightborhood="+request.getNeighborhood());
+            if (request.getPostalCode() != null) lst.add("postal_code="+request.getPostalCode());
+
+            val queryString = String.join("&", lst);
+
+            val url = baseUrl + "catalog/resources/search?" + queryString + "&page={page}";
+
+            val list = new ArrayList<Resource>();
+            int i = 1;
+            while (true) {
+                val url_ = url.replace("{page}", i+"");
+                val response = Unirest.get(url_)
+                        .header("accept", "application/json")
+                        //.header("content-type", "application/json")
+                        .asJson().getBody().toString();
+                val resources = gson.fromJson(response, Resources.class);
+                if (resources.getResources().size() == 0) {
+                    break;
+                }
+                list.addAll(resources.getResources());
+                i++;
+            }
+            return list;
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -114,81 +107,129 @@ public class InterSCityService {
 
     }
 
-    public List<Capability> findAllCapabilities() {
+    // GET /catalog/resources/{uuid}
+    public Resource getResource(String uuid) {
+
+        try {
+            val url = baseUrl + "/catalog/resources/{uuid}";
+
+            val response = Unirest.get(url)
+                        .header("accept", "application/json")
+                        //.header("content-type", "application/json")
+                        .routeParam("uuid", uuid)
+                        .asJson().getBody().toString();
+            val resourceData = gson.fromJson(response, ResourceData.class);
+            return resourceData.getData();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    // GET /catalog/capabilities
+    public List<Capability> getAllCapabilities(Option<String> capabilityType) {
+
         try {
             val url = baseUrl + "/catalog/capabilities";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _capabilities = gson.fromJson(json, Capabilities.class);
-            val capabilities = _capabilities.getCapabilities();
-            return capabilities;
+
+            String response;
+            if (capabilityType.isDefined()) {
+                response = Unirest.get(url)
+                        .header("accept", "application/json")
+                        //.header("content-type", "application/json")
+                        .queryString("capability_type", capabilityType.get())
+                        .asJson().getBody().toString();
+            }
+            else {
+                response = Unirest.get(url)
+                        .header("accept", "application/json")
+                        //.header("content-type", "application/json")
+                        .asJson().getBody().toString();
+            }
+            val capabilities = gson.fromJson(response, Capabilities.class);
+            return capabilities.getCapabilities();
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+                throw new RuntimeException(e);
         }
+
     }
 
-    public List<Capability> findAllSensorCapabilities() {
-        try {
-            val url = baseUrl + "/catalog/capabilities?capability_type=sensor";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _capabilities = gson.fromJson(json, Capabilities.class);
-            val capabilities = _capabilities.getCapabilities();
-            return capabilities;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    // GET /catalog/capabilities/{name}
+    public Capability getCapability(String name) {
 
-    public List<Capability> findAllActuatorCapabilities() {
         try {
-            val url = baseUrl + "/catalog/capabilities?capability_type=actuator";
-            val json = Unirest.get(url)
-                    .header("accept", "application/json")
-                    .asJson().getBody().toString();
-            val _capabilities = gson.fromJson(json, Capabilities.class);
-            val capabilities = _capabilities.getCapabilities();
-            return capabilities;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+            val url = baseUrl + "/catalog/capabilities/{name}";
 
-    public Capability findCapability(String name) {
-        try {
-            val url = baseUrl + "catalog/capabilities/{name}";
-            val json = Unirest.get(url)
+            val response = Unirest.get(url)
                     .header("accept", "application/json")
+                    //.header("content-type", "application/json")
                     .routeParam("name", name)
                     .asJson().getBody().toString();
-            val capability = gson.fromJson(json, Capability.class);
-            return capability;
+            return gson.fromJson(response, Capability.class);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    // POST /collector/resources/data
+    public GetContextDataResponse getContextData(GetContextDataRequest request) {
+        try {
+            val url = baseUrl + "collector/resources/data";
+            val jsonRequest = gson.toJson(request);
+            val response = Unirest.post(url)
+                    .header("accept", "application/json")
+                    .header("content-type", "application/json")
+                    .body(jsonRequest).asJson().getBody().toString();
+            return gson.fromJson(response, GetContextDataResponse.class);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public List<Resource> findAllResourcesByParams(Map<String, String> params) {
+    // POST /collector/resources/data/last
+    public GetContextDataResponse getLastContextData(GetContextDataRequest request) {
         try {
+            val url = baseUrl + "collector/resources/data/last";
+            val jsonRequest = gson.toJson(request);
+            val response = Unirest.post(url)
+                    .header("accept", "application/json")
+                    .header("content-type", "application/json")
+                    .body(jsonRequest).asJson().getBody().toString();
+            return gson.fromJson(response, GetContextDataResponse.class);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // GET /discovery/resources
+    public List<Resource> discoveryResources(DiscoveryResourcesRequest request) {
+
+        try {
+
             val lst = new ArrayList<String>();
-            for (val entry : params.entrySet()) {
-                lst.add(entry.getKey() + "=" + entry.getValue());
-            }
-            val p = String.join("&", lst);
-            val url = baseUrl + "catalog/resources/search?" + p;
 
-            val json = Unirest.get(url)
+            if (request.getCapability() != null) lst.add("capability="+request.getCapability());
+            if (request.getLat() != null) lst.add("lat="+request.getLat());
+            if (request.getLon() != null) lst.add("lon="+request.getLon());
+            if (request.getRadius() != null) lst.add("radius="+request.getRadius());
+            lst.addAll(request.getMatchers());
+
+            val queryString = String.join("&", lst);
+
+            val url = baseUrl + "discovery/resources?" + queryString;
+
+            val response = Unirest.get(url)
                     .header("accept", "application/json")
+                    //.header("Content-Type", "application/json")
                     .asJson().getBody().toString();
-            val _resources = gson.fromJson(json, Resources.class);
-            val resources = _resources.getResources();
-            return resources;
+            val resources = gson.fromJson(response, Resources.class);
+            return resources.getResources();
         }
         catch (Exception e) {
             throw new RuntimeException(e);
@@ -196,97 +237,23 @@ public class InterSCityService {
 
     }
 
-    public List<Object> findAllDataValue(String uuid, String capability, String contextData) {
-
-        try {
-            PostDataCollector pdc = new PostDataCollector();
-            pdc.setUuids(Arrays.asList(uuid));
-            pdc.setCapabilities(Arrays.asList(capability));
-
-            DataCollectorResponse response = new DataCollectorResponse(findAllData(gson.toJson(pdc)));
-
-            List<Object> list = new ArrayList<>();
-            for (DataCollectorResource dcr : response.getResources()) {
-                for (DataCollectorCapability dcc : dcr.getCapabilities()) {
-                    for (DataCollectorContextData dccd :dcc.getDataList()) {
-                        Map<String, Object> data = dccd.getData();
-                        if (data.get(contextData) != null) {
-                            list.add(data.get(contextData));
-                        }
-                    }
-                }
-            }
-            return list;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public List<List<Object>> findAllDataValue(String uuid, String capability, String[] contextData) {
-
-        try {
-            PostDataCollector pdc = new PostDataCollector();
-            pdc.setUuids(Arrays.asList(uuid));
-            pdc.setCapabilities(Arrays.asList(capability));
-
-            DataCollectorResponse response = new DataCollectorResponse(findAllData(gson.toJson(pdc)));
-
-            List<List<Object>> list = new ArrayList<>();
-            for (DataCollectorResource dcr : response.getResources()) {
-                for (DataCollectorCapability dcc : dcr.getCapabilities()) {
-                    for (DataCollectorContextData dccd :dcc.getDataList()) {
-                        Map<String, Object> data = dccd.getData();
-                        List<Object> list2 = new ArrayList<>();
-                        for (String s : contextData) {
-                            list2.add(data.get(s));
-                        }
-                        list.add(list2);
-                    }
-                }
-            }
-            return list;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public List<Resource> findAllData(PostDataCollector pdc) {
-
-        try {
-            val url = baseUrl + "collector/resources/data";
-            String post = gson.toJson(pdc);
-            val json = Unirest.post(url)
+    private List<Resource> findResources(String url) throws UnirestException {
+        val list = new ArrayList<Resource>();
+        int i = 1;
+        while (true) {
+            val response = Unirest.get(url)
                     .header("accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(post).asJson().getBody().toString();
-            val _resources = gson.fromJson(json, Resources.class);
-            val resources = _resources.getResources();
-            return resources;
+                    //.header("content-type", "application/json")
+                    .queryString("page", i)
+                    .asJson().getBody().toString();
+            val resources = gson.fromJson(response, Resources.class);
+            if (resources.getResources().size() == 0) {
+                break;
+            }
+            list.addAll(resources.getResources());
+            i++;
         }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    public String findAllData(String json) {
-
-        try {
-            val url = baseUrl + "collector/resources/data";
-            val result = Unirest.post(url)
-                    .header("accept", "application/json")
-                    .header("Content-Type", "application/json")
-                    .body(json).asJson().getBody().toString();
-            return result;
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
+        return list;
     }
 
 }

@@ -1,40 +1,21 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
-import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
-import br.ufma.lsdi.dashboardlab.dashboardlab.component.TextListComponent;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.PostDataCollector;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.collector.*;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
+import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.Resource;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
-import com.google.gson.Gson;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.ui.*;
-import lombok.val;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LMarker;
 import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 import org.vaadin.addon.leaflet.markercluster.LMarkerClusterGroup;
 import org.vaadin.ui.NumberField;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Widgetset("br.ufma.lsdi.dashboardlab.dashboardlab.LeafletWidgetset")
 public class MapView extends HorizontalLayout {
 
     private final InterSCityService interSCityService;
-
-    private TwinColSelect<String> resourcesSelect;
-    private TwinColSelect<String> capabilitiesSelect;
-    private TextListComponent matchersList;
-    private DateField startDate;
-    private DateField endDate;
-
-    Grid<Resource> resourceGrid;
-
-    Gson gson = AppGson.get();
 
     LMarkerClusterGroup cluster;
 
@@ -99,7 +80,7 @@ public class MapView extends HorizontalLayout {
 
         // pesquisa por json
         button.addClickListener(e -> {
-            String json = interSCityService.findAllData(capabilitiesTextField.getValue());
+            /*String json = interSCityService.findAllData(capabilitiesTextField.getValue());
             DataCollectorResponse response = new DataCollectorResponse(json);
 
             for(DataCollectorResource resource: response.getResources()) {
@@ -115,14 +96,14 @@ public class MapView extends HorizontalLayout {
                         }
                     }
                 }
-            }
+            }*/
 
         });
 
         // pesquisa pelos campos do formulario
         button2.addClickListener(e -> {
 
-            List<Resource> resources = interSCityService.findAllResources();
+            List<Resource> resources = interSCityService.getAllResources();
             for(Resource resource: resources) {
                 LMarker marker = new LMarker(resource.getLat(), resource.getLon());
                 marker.setTitle(resource.getDescription());
@@ -143,7 +124,7 @@ public class MapView extends HorizontalLayout {
         popup += "<b>UUID:</b> " + resource.getUuid() + "<br/>";
         popup += "<b>Description:</b> " + resource.getDescription() + "<br/>";
         popup += "<b>Status:</b> " + resource.getStatus() + "<br/>";
-        popup += "<b>Capabilities:</b> " + resource.getCapabilitiesAsList() + "<br/>";
+        //popup += "<b>Capabilities:</b> " + resource.getCapabilitiesAsList() + "<br/>";
         popup += "<b>Uri:</b> " + resource.getUri() + "<br/>";
         popup += "<b>Latitude:</b> " + resource.getLat() + "<br/>";
         popup += "<b>Longitude:</b> " + resource.getLon() + "<br/>";

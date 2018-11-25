@@ -1,4 +1,4 @@
-package br.ufma.lsdi.dashboardlab.dashboardlab.model;
+package br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel;
 
 import lombok.Data;
 

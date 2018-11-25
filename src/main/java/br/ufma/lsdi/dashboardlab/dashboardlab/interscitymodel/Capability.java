@@ -1,4 +1,4 @@
-package br.ufma.lsdi.dashboardlab.dashboardlab.model;
+package br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -14,11 +14,5 @@ public class Capability {
     String function;
     String description;
     String capabilityType;
-    public Capability(String name) {
-        this.name = name;
-    }
 
-    public String toString() {
-        return name;
-    }
 }
