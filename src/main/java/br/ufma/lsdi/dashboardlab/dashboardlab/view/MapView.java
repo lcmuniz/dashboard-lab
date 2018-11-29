@@ -90,23 +90,41 @@ public class MapView extends HorizontalLayout {
         val capabilityTextField = new TextField("Capability");
         capabilityTextField.setSizeFull();
         val latitudeTextField = new TextField("Latitude");
+        latitudeTextField.setSizeFull();
+       // latitudeTextField.setWidth(140, Unit.PIXELS);
         val longitudeTextField = new TextField("Longitude");
+        longitudeTextField.setSizeFull();
+        //longitudeTextField.setWidth(140, Unit.PIXELS);
         val radiusTextField = new TextField("Radius");
+        radiusTextField.setSizeFull();
         val statusTextField = new TextField("Status");
+        statusTextField.setSizeFull();
         val cityTextField = new TextField("City");
+        cityTextField.setSizeFull();
         val neighborhoodTextField = new TextField("Neighborhood");
+        neighborhoodTextField.setSizeFull();
         val stateTextField = new TextField("State");
+        stateTextField.setSizeFull();
+        //stateTextField.setWidth(140, Unit.PIXELS);
         val postalCodeTextField = new TextField("Postal Code");
+        postalCodeTextField.setSizeFull();
+        //postalCodeTextField.setWidth(140, Unit.PIXELS);
         val countryTextField = new TextField("Country");
+        countryTextField.setSizeFull();
         val button = new Button("Search");
 
         val line1 = new HorizontalLayout(descriptionTextField, capabilityTextField);
         line1.setSizeFull();
         resTab.addComponent(line1);
-        resTab.addComponent(new HorizontalLayout(latitudeTextField, longitudeTextField, radiusTextField));
-        resTab.addComponent(statusTextField);
-        resTab.addComponent(new HorizontalLayout(cityTextField, neighborhoodTextField));
-        resTab.addComponent(new HorizontalLayout(stateTextField, postalCodeTextField, countryTextField));
+        val line2 = new HorizontalLayout(latitudeTextField, longitudeTextField, radiusTextField);
+        line2.setSizeFull();
+        resTab.addComponent(line2);
+        val line3 = new HorizontalLayout(statusTextField, cityTextField, neighborhoodTextField);
+        line3.setSizeFull();
+        resTab.addComponent(line3);
+        val line4 = new HorizontalLayout(stateTextField, postalCodeTextField, countryTextField);
+        line4.setSizeFull();
+        resTab.addComponent(line4);
         resTab.addComponent(button);
 
         button.addClickListener(e -> {
