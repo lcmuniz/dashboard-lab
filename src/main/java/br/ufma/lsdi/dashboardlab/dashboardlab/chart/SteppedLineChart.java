@@ -2,7 +2,6 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.chart;
 
 import com.byteowls.vaadin.chartjs.ChartJs;
 import com.byteowls.vaadin.chartjs.config.LineChartConfig;
-import com.byteowls.vaadin.chartjs.data.Dataset;
 import com.byteowls.vaadin.chartjs.data.LineDataset;
 import com.byteowls.vaadin.chartjs.options.InteractionMode;
 import com.byteowls.vaadin.chartjs.options.scale.Axis;
@@ -10,27 +9,95 @@ import com.byteowls.vaadin.chartjs.options.scale.CategoryScale;
 import com.byteowls.vaadin.chartjs.options.scale.LinearScale;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
 import com.vaadin.ui.Component;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SteppedLineChart {
 
     private static final long serialVersionUID = -1977315515493155463L;
 
-    public Component getChart() {
+    @Getter
+    @Setter
+    String title;
+
+    @Getter @Setter
+    String XLabel = "";
+    @Getter @Setter
+    String YLabel = "Value";
+
+    final List<DataValue> data = new ArrayList<>();
+
+    @Data
+    @AllArgsConstructor
+    class DataValue {
+        String group;
+        String dataset;
+        Double value;
+    }
+    public void addData(String group, String dataset, Double value) {
+        data.add(new DataValue(group, dataset, value));
+    }
+
+    public LineChartConfig buildData() {
+
+
+
         LineChartConfig config = new LineChartConfig();
-        config.data()
-                .labels("January", "February", "March", "April", "May", "June", "July")
-                .addDataset(new LineDataset().label("My First dataset").fill(false).borderDash(5,5).steppedLine(true))
-                .addDataset(new LineDataset().label("hidden dataset").steppedLine(true).hidden(true))
-                .addDataset(new LineDataset().label("My Second dataset").steppedLine(true))
-                .and()
+
+        List<String> labels = data.stream().map(d -> d.group).distinct().collect(Collectors.toList());
+        config.data().labelsAsList(labels);
+        List<String> ds = data.stream().map(d -> d.dataset).distinct().collect(Collectors.toList());
+        ds.stream().forEach(dst -> {
+            LineDataset bd = new LineDataset();
+            bd.fill(false);
+            bd.steppedLine(true);
+            bd.label(dst);
+            bd.borderColor(ColorUtils.randomColor(0.4));
+            bd.backgroundColor(ColorUtils.randomColor(0.5));
+            bd.pointBorderColor(ColorUtils.randomColor(0.7));
+            bd.pointBackgroundColor(ColorUtils.randomColor(0.5));
+            bd.pointBorderWidth(1);
+            bd.borderColor(ColorUtils.randomColor(0.3));
+            bd.backgroundColor(ColorUtils.randomColor(0.5));
+            for (String l : labels) {
+                Optional<DataValue> any = data.stream().filter(d -> d.group.equals(l) && d.dataset.equals(dst)).findAny();
+                if (any.isPresent()) {
+                    bd.addData(any.get().value);
+                }
+                else {
+                    bd.addData(0);
+                }
+            }
+            config.data().addDataset(bd);
+        });
+        return config;
+    }
+
+    public Component getChart() {
+
+        double min = data.stream().mapToDouble(d -> d.value).min().getAsDouble();
+        double max = data.stream().mapToDouble(d -> d.value).max().getAsDouble();
+        min = Math.floor(min / 10) * 10;
+        max = Math.ceil(max / 10) * 10;
+        System.out.println(min);
+        System.out.println(max);
+
+        LineChartConfig config = buildData();
+
+
+        config.data().and()
                 .options()
                 .responsive(true)
                 .title()
                 .display(true)
-                .text("Chart.js Line Chart - Stepped Line")
+                .text(title)
                 .and()
                 .tooltips()
                 .mode(InteractionMode.INDEX)
@@ -40,36 +107,20 @@ public class SteppedLineChart {
                         .display(true)
                         .scaleLabel()
                         .display(true)
-                        .labelString("Month")
+                        .labelString(XLabel)
                         .and())
                 .add(Axis.Y, new LinearScale()
                         .display(true)
                         .scaleLabel()
                         .display(true)
-                        .labelString("Value")
+                        .labelString(YLabel)
                         .and()
                         .ticks()
-                        .suggestedMin(-10)
-                        .suggestedMax(250)
+                        .suggestedMin(min)
+                        .suggestedMax(max)
                         .and())
                 .and()
                 .done();
-
-        // add random data for demo
-        List<String> labels = config.data().getLabels();
-        for (Dataset<?, ?> ds : config.data().getDatasets()) {
-            LineDataset lds = (LineDataset) ds;
-            List<Double> data = new ArrayList<>();
-            for (int i = 0; i < labels.size(); i++) {
-                data.add((double) (Math.random() > 0.5 ? -1 : 1) * Math.round(Math.random() * 100));
-            }
-            lds.dataAsList(data);
-            lds.borderColor(ColorUtils.randomColor(0.4));
-            lds.backgroundColor(ColorUtils.randomColor(0.5));
-            lds.pointBorderColor(ColorUtils.randomColor(0.7));
-            lds.pointBackgroundColor(ColorUtils.randomColor(0.5));
-            lds.pointBorderWidth(1);
-        }
 
         ChartJs chart = new ChartJs(config);
         chart.addClickListener((a,b) ->

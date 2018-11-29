@@ -1,13 +1,16 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
-import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.Resource;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.SearchResourcesRequest;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.vaadin.annotations.Widgetset;
 import com.vaadin.ui.*;
+import lombok.val;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LMarker;
 import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 import org.vaadin.addon.leaflet.markercluster.LMarkerClusterGroup;
+import org.vaadin.addon.leaflet.shared.Point;
 import org.vaadin.ui.NumberField;
 
 import java.util.List;
@@ -17,15 +20,18 @@ public class MapView extends HorizontalLayout {
 
     private final InterSCityService interSCityService;
 
+    LMap map;
     LMarkerClusterGroup cluster;
+
+    double zoomLevel = 15.0;
 
     public MapView(InterSCityService interSCityService, IndexUI indexUI) {
 
         this.interSCityService = interSCityService;
 
-        LMap map = new LMap();
+        map = new LMap();
         map.setCenter(-2.476825, -44.181216);
-        map.setZoomLevel(100);
+        map.setZoomLevel(zoomLevel);
         map.setSizeFull();
 
         LMarker marker1 = new LMarker(-2.476825, -44.181216);
@@ -42,6 +48,8 @@ public class MapView extends HorizontalLayout {
 
         GridLayout grid = new GridLayout(2,1);
         grid.setSizeFull();
+        grid.setMargin(false);
+        grid.setSpacing(false);
         grid.setColumnExpandRatio(0, 0.6f);
         grid.setColumnExpandRatio(1, 0.4f);
         grid.addComponent(map);
@@ -49,6 +57,7 @@ public class MapView extends HorizontalLayout {
 
         addComponent(grid);
 
+        //setSizeFull();
         setWidth("100%");
         setHeight("100%");
 
@@ -57,64 +66,76 @@ public class MapView extends HorizontalLayout {
     private VerticalLayout createForm() {
 
         VerticalLayout vl = new VerticalLayout();
+        //vl.setMargin(false);
+        vl.setSpacing(false);
 
         Label searchLabel = new Label("Search");
         searchLabel.addStyleName("h2");
 
-        Label locationLabel = new Label("Select DataCollectorLocation");
-        NumberField latitudeNumberField = new NumberField("Latitude");
-        NumberField longitudeNumberField = new NumberField("Longitude");
-        NumberField radiusNumberField = new NumberField("Radius");
+        VerticalLayout resTab = new VerticalLayout();
+        resTab.setWidth("100%");
+        VerticalLayout dataTab = new VerticalLayout();
+        dataTab.setWidth("100%");
+        TabSheet tabs =  new TabSheet();
+        tabs.setSizeFull();
 
-        TextField capabilitiesTextField = new TextField("Capabilities");
+        tabs.addTab(resTab).setCaption("Resources");
+        tabs.addTab(dataTab).setCaption("Context Data");
 
         vl.addComponent(searchLabel);
-        vl.addComponent(capabilitiesTextField);
-        vl.addComponent(locationLabel);
-        vl.addComponent(latitudeNumberField);
-        vl.addComponent(longitudeNumberField);
-        vl.addComponent(radiusNumberField);
+        vl.addComponent(tabs);
 
-        Button button = new Button("Search");
-        Button button2 = new Button("Search 2");
+        val descriptionTextField = new TextField("Description");
+        descriptionTextField.setSizeFull();
+        val capabilityTextField = new TextField("Capability");
+        capabilityTextField.setSizeFull();
+        val latitudeTextField = new TextField("Latitude");
+        val longitudeTextField = new TextField("Longitude");
+        val radiusTextField = new TextField("Radius");
+        val statusTextField = new TextField("Status");
+        val cityTextField = new TextField("City");
+        val neighborhoodTextField = new TextField("Neighborhood");
+        val stateTextField = new TextField("State");
+        val postalCodeTextField = new TextField("Postal Code");
+        val countryTextField = new TextField("Country");
+        val button = new Button("Search");
 
-        // pesquisa por json
+        val line1 = new HorizontalLayout(descriptionTextField, capabilityTextField);
+        line1.setSizeFull();
+        resTab.addComponent(line1);
+        resTab.addComponent(new HorizontalLayout(latitudeTextField, longitudeTextField, radiusTextField));
+        resTab.addComponent(statusTextField);
+        resTab.addComponent(new HorizontalLayout(cityTextField, neighborhoodTextField));
+        resTab.addComponent(new HorizontalLayout(stateTextField, postalCodeTextField, countryTextField));
+        resTab.addComponent(button);
+
         button.addClickListener(e -> {
-            /*String json = interSCityService.findAllData(capabilitiesTextField.getValue());
-            DataCollectorResponse response = new DataCollectorResponse(json);
+            val request = new SearchResourcesRequest();
+            if (!descriptionTextField.getValue().isEmpty()) request.setDescription(descriptionTextField.getValue());
+            if (!capabilityTextField.getValue().isEmpty()) request.setCapability(capabilityTextField.getValue());
+            if (!latitudeTextField.getValue().isEmpty()) request.setLat(Double.parseDouble(latitudeTextField.getValue()));
+            if (!longitudeTextField.getValue().isEmpty()) request.setLon(Double.parseDouble(longitudeTextField.getValue()));
+            if (!radiusTextField.getValue().isEmpty()) request.setRadius(Double.parseDouble(radiusTextField.getValue()));
+            if (!statusTextField.getValue().isEmpty()) request.setStatus(statusTextField.getValue());
+            if (!cityTextField.getValue().isEmpty()) request.setCity(cityTextField.getValue());
+            if (!neighborhoodTextField.getValue().isEmpty()) request.setNeighborhood(neighborhoodTextField.getValue());
+            if (!stateTextField.getValue().isEmpty()) request.setState(stateTextField.getValue());
+            if (!postalCodeTextField.getValue().isEmpty()) request.setPostalCode(postalCodeTextField.getValue());
+            if (!countryTextField.getValue().isEmpty()) request.setCountry(countryTextField.getValue());
+            List<Resource> resources = interSCityService.searchResources(request);
 
-            for(DataCollectorResource resource: response.getResources()) {
-                for (DataCollectorCapability capabilities : resource.getCapabilities()) {
-                    for (DataCollectorContextData contextData : capabilities.getDataList()) {
-                        DataCollectorLocation location = contextData.getLocation();
-
-                        if (location != null) {
-                            LMarker marker = new LMarker(location.getLat(), location.getLon());
-                            marker.setTitle(contextData.getCapability().getName());
-                            marker.setPopup(contextData.getCapability().toHTML());
-                            cluster.addComponent(marker);
-                        }
-                    }
-                }
-            }*/
-
-        });
-
-        // pesquisa pelos campos do formulario
-        button2.addClickListener(e -> {
-
-            List<Resource> resources = interSCityService.getAllResources();
-            for(Resource resource: resources) {
-                LMarker marker = new LMarker(resource.getLat(), resource.getLon());
-                marker.setTitle(resource.getDescription());
-                marker.setPopup(createPopoup(resource));
+            resources.stream().forEach(r -> {
+                LMarker marker = new LMarker(r.getLat(), r.getLon());
+                marker.setTitle(r.getDescription());
+                marker.setPopup(r.toHTML());
                 cluster.addComponent(marker);
+            });
+
+            if (resources.size() > 0) {
+                map.flyTo(resources.stream().map(res -> new Point(res.getLat(), res.getLon())).findAny().get(), zoomLevel);
             }
 
         });
-
-        vl.addComponent(button);
-        vl.addComponent(button2);
 
         return vl;
     }
@@ -124,7 +145,7 @@ public class MapView extends HorizontalLayout {
         popup += "<b>UUID:</b> " + resource.getUuid() + "<br/>";
         popup += "<b>Description:</b> " + resource.getDescription() + "<br/>";
         popup += "<b>Status:</b> " + resource.getStatus() + "<br/>";
-        //popup += "<b>Capabilities:</b> " + resource.getCapabilitiesAsList() + "<br/>";
+        popup += "<b>Capabilities:</b> " + resource.getCapabilities().stream().limit(10) + "<br/>";
         popup += "<b>Uri:</b> " + resource.getUri() + "<br/>";
         popup += "<b>Latitude:</b> " + resource.getLat() + "<br/>";
         popup += "<b>Longitude:</b> " + resource.getLon() + "<br/>";

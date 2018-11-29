@@ -6,33 +6,50 @@ import com.byteowls.vaadin.chartjs.data.Dataset;
 import com.byteowls.vaadin.chartjs.data.PieDataset;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
 import com.vaadin.ui.Component;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PieChart {
+
+    private static final long serialVersionUID = 4894923343920891837L;
 
     @Getter @Setter
     private String title;
 
-    @Getter @Setter
-    private String[] labels;
+    final List<DataValue> data = new ArrayList<>();
 
-    @Getter @Setter
-    private List<Double> data;
+    @Data
+    @AllArgsConstructor
+    class DataValue {
+        String dataset;
+        Double value;
+    }
+    public void addData(String dataset, Double value) {
+        data.add(new DataValue(dataset, value));
+    }
 
-    private static final long serialVersionUID = 4894923343920891837L;
+    public PieChartConfig buildData() {
+        PieChartConfig config = new PieChartConfig();
+        List<String> labels = data.stream().map(d -> d.dataset).collect(Collectors.toList());
+        List<Double> values = data.stream().map(d -> d.value).collect(Collectors.toList());
+        List<String> colors = data.stream().map(d -> ColorUtils.randomColor(0.7)).collect(Collectors.toList());
+        config.data().labelsAsList(labels);
+        PieDataset bd = new PieDataset();
+        bd.dataAsList(values);
+        bd.backgroundColor(colors.toArray(new String[0]));
+        config.data().addDataset(bd);
+        return config;
+    }
 
     public Component getChart() {
-        PieChartConfig config = new PieChartConfig();
-        config
-                .data()
-                .labels(labels)
-                .addDataset(new PieDataset().label("Dataset 1"))
-                .and();
-
+        PieChartConfig config = buildData();
         config.
                 options()
                 .responsive(true)
@@ -45,19 +62,6 @@ public class PieChart {
                 .animateRotate(true)
                 .and()
                 .done();
-
-        List<String> labels = config.data().getLabels();
-        for (Dataset<?, ?> ds : config.data().getDatasets()) {
-            PieDataset lds = (PieDataset) ds;
-            List<Double> datas = new ArrayList<>();
-            List<String> colors = new ArrayList<>();
-            for (int i = 0; i < labels.size(); i++) {
-                datas.add(data.get(i));
-                colors.add(ColorUtils.randomColor(0.7));
-            }
-            lds.backgroundColor(colors.toArray(new String[colors.size()]));
-            lds.dataAsList(datas);
-        }
 
         ChartJs chart = new ChartJs(config);
         chart.setJsLoggingEnabled(true);

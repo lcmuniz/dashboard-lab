@@ -66,7 +66,7 @@ public abstract class ChartUtils {
     }
 
     public static void notification(int dataSetIdx, int dataIdx, Dataset<?, ?> dataset) {
-        Notification.show("Dataset at Idx:" + dataSetIdx + "; Data at Idx: " + dataIdx + "; Value: " + dataset.getData().get(dataIdx), Type.TRAY_NOTIFICATION);
+        Notification.show("DatasetX at Idx:" + dataSetIdx + "; Data at Idx: " + dataIdx + "; Value: " + dataset.getData().get(dataIdx), Type.TRAY_NOTIFICATION);
     }
     public static void legendNotification(int datasetIdx, boolean visible, int[] visibles) {
         Notification.show("Triggering visible dataset at Idx:" + datasetIdx + "; visible: " + visible + "; Visible indexes: " + Arrays.toString(visibles), Type.TRAY_NOTIFICATION);

@@ -1,13 +1,15 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
+import br.ufma.lsdi.dashboardlab.dashboardlab.chart.*;
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.google.gson.Gson;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import lombok.val;
+
+import java.time.LocalDateTime;
 
 public class IndexView extends VerticalLayout {
 
@@ -21,17 +23,10 @@ public class IndexView extends VerticalLayout {
 
         VerticalLayout map = createPanel();
 
-        GridLayout grid = new GridLayout(2,1);
-        grid.setSizeFull();
-        grid.setColumnExpandRatio(0, 1);
-        //grid.setColumnExpandRatio(0, 0.6f);
-        //grid.setColumnExpandRatio(1, 0.4f);
-        grid.addComponent(map);
+        addComponent(map);
 
-        addComponent(grid);
-
-        setWidth("100%");
-        setHeight("100%");
+        //setWidth("100%");
+        //setHeight("100%");
 
     }
 
@@ -43,6 +38,38 @@ public class IndexView extends VerticalLayout {
 
         Button button = new Button("Teste");
         button.addClickListener(e -> {
+
+            TimeLineChart chart = new TimeLineChart();
+            chart.setTitle("Meu Gráfico".toUpperCase());
+            chart.addData("temperature", LocalDateTime.now(), 1.0);
+            chart.addData("temperature", LocalDateTime.now().plusHours(10),2.0);
+            chart.addData("temperature", LocalDateTime.now().plusHours(30), 1.0);
+            chart.addData("humidity", LocalDateTime.now(), 1.5);
+            chart.addData("humidity", LocalDateTime.now().plusHours(10),1.5);
+            chart.addData("humidity", LocalDateTime.now().plusHours(30),2.5);
+
+
+//            DonutChart chart = new DonutChart();
+//            chart.setTitle("Meu Gráfico".toUpperCase());
+//            chart.setLabels(Arrays.asList("J", "F", "M", "A", "M"));
+//
+//            List<Double> data = new ArrayList<>();
+//            for (int i = 0; i < 5; i++) {
+//                data.add((double) (Math.round(Math.random() * 100)));
+//            }
+//
+//            chart.addDataset("Dataset 1", data);
+//
+//            data = new ArrayList<>();
+//            for (int i = 0; i < 5; i++) {
+//                data.add((double) (Math.round(Math.random() * 100)));
+//            }
+//
+//            chart.addDataset("Dataset 2", data);
+
+            vl.removeAllComponents();
+            vl.addComponent(button);
+            vl.addComponent(chart.getChart());
 
 /*
             DiscoveryResourcesRequest request = new DiscoveryResourcesRequest();

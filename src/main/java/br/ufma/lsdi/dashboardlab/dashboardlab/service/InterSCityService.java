@@ -1,9 +1,9 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.service;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
-import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.*;
-import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.contextdata.GetContextDataRequest;
-import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.contextdata.GetContextDataResponse;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.*;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.contextdata.GetContextDataRequest;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.contextdata.GetContextDataResponse;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;

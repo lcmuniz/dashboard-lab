@@ -1,30 +1,20 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
-import br.ufma.lsdi.dashboardlab.dashboardlab.chart.*;
-import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
-import br.ufma.lsdi.dashboardlab.dashboardlab.interscitymodel.SearchResourcesRequest;
+import br.ufma.lsdi.dashboardlab.dashboardlab.chart.PieChart;
+import br.ufma.lsdi.dashboardlab.dashboardlab.chart.VerticalBarChart;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.SearchResourcesRequest;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
-import com.google.gson.Gson;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.*;
 import io.vavr.control.Option;
 import lombok.val;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 public class CommonQueriesView extends VerticalLayout {
 
     private final InterSCityService interSCityService;
-
-    Gson gson = AppGson.get();
-
-    TextField uuidTextField;
-    TextField capabilityTextField;
-    TextField contextDataXTextField;
-    TextField contextDataYTextField;
 
     VerticalLayout chartLayout;
     ComboBox<String> queries;
@@ -58,12 +48,6 @@ public class CommonQueriesView extends VerticalLayout {
         val vl = new VerticalLayout();
         vl.setSpacing(false);
         vl.setMargin(false);
-/*
-        uuidTextField = new TextField("UUID");
-        capabilityTextField = new TextField("Capability");
-        contextDataXTextField = new TextField("Context Data (X)");
-        contextDataYTextField = new TextField("Context Data (Y)");
-*/
 
         val form = new VerticalLayout();
         form.setSizeFull();
@@ -149,23 +133,17 @@ public class CommonQueriesView extends VerticalLayout {
         spinner.setIndeterminate(true);
         chartLayout.addComponent(spinner);
 
-        val request = new SearchResourcesRequest();
-        List<Double> qr = new ArrayList<>();
-        for (String capability : capabilities) {
-            request.setCapability(capability);
+        val chart = new VerticalBarChart();
+        chart.setTitle(queries.getValue().toUpperCase());
+
+        capabilities.stream().forEach(cap -> {
+            val request = new SearchResourcesRequest();
+            request.setCapability(cap);
             val resources = interSCityService.searchResources(request);
-            qr.add((double)resources.size());
-        }
+            resources.stream().forEach(res -> chart.addData("Resources", cap, (double) resources.size()));
+        });
 
         chartLayout.removeAllComponents();
-        val chart = new VerticalBarChart();
-
-        chart.setTitle(queries.getValue());
-        String[] labels = capabilities.stream().toArray(String[]::new);
-        chart.setLabels(labels);
-        chart.setYLabel("Resources");
-        chart.setDatasetLabel("Capabilities");
-        chart.setData(qr);
         chartLayout.addComponent(chart.getChart());
     }
 
@@ -178,22 +156,13 @@ public class CommonQueriesView extends VerticalLayout {
         int sensors = interSCityService.getAllResourcesWithSensorCapabilities().size();
         int actuators = interSCityService.getAllResourcesWithActuatorCapabilities().size();
 
-        List<Double> qr = new ArrayList<>();
-        qr.add((double) sensors);
-        qr.add((double) actuators);
-
-        System.out.println(sensors);
-        System.out.println(actuators);
+        PieChart pieChart = new PieChart();
+        pieChart.setTitle(queries.getValue().toUpperCase());
+        pieChart.addData("Sensors", (double) sensors);
+        pieChart.addData("Actuators", (double) actuators);
 
         chartLayout.removeAllComponents();
-        val chart = new PieChart();
-
-        chart.setTitle(queries.getValue());
-        String[] labels = {"Sensors", "Actuators"};
-        chart.setLabels(labels);
-        chart.setData(qr);
-
-        chartLayout.addComponent(chart.getChart());
+        chartLayout.addComponent(pieChart.getChart());
     }
 
     private void plotCapabilitiesPerTypeChart() {
@@ -205,22 +174,14 @@ public class CommonQueriesView extends VerticalLayout {
         int sensors = interSCityService.getAllCapabilities(Option.of("sensor")).size();
         int actuators = interSCityService.getAllCapabilities(Option.of("actuator")).size();
 
-        List<Double> qr = new ArrayList<>();
-        qr.add((double) sensors);
-        qr.add((double) actuators);
-
-        System.out.println(sensors);
-        System.out.println(actuators);
+        PieChart pieChart = new PieChart();
+        pieChart.setTitle(queries.getValue().toUpperCase());
+        pieChart.addData("Sensors", (double) sensors);
+        pieChart.addData("Actuators", (double) actuators);
 
         chartLayout.removeAllComponents();
-        val chart = new PieChart();
+        chartLayout.addComponent(pieChart.getChart());
 
-        chart.setTitle(queries.getValue().toUpperCase());
-        String[] labels = {"Sensors", "Actuators"};
-        chart.setLabels(labels);
-        chart.setData(qr);
-
-        chartLayout.addComponent(chart.getChart());
     }
 
 

@@ -2,28 +2,68 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.chart;
 
 import com.byteowls.vaadin.chartjs.ChartJs;
 import com.byteowls.vaadin.chartjs.config.ScatterChartConfig;
-import com.byteowls.vaadin.chartjs.data.Dataset;
 import com.byteowls.vaadin.chartjs.data.ScatterDataset;
 import com.byteowls.vaadin.chartjs.options.InteractionMode;
 import com.byteowls.vaadin.chartjs.options.Position;
 import com.byteowls.vaadin.chartjs.options.scale.Axis;
 import com.byteowls.vaadin.chartjs.options.scale.LinearScale;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ScatterLineChart {
 
     private static final long serialVersionUID = -4668420742225695694L;
 
-    public Component getChart() {
+    @Getter
+    @Setter
+    String title;
+
+    final List<DataValue> data = new ArrayList<>();
+
+    @Data
+    @AllArgsConstructor
+    class DataValue {
+        String dataset;
+        Double x;
+        Double y;
+    }
+    public void addData(String dataset, Double x, Double y) {
+        data.add(new DataValue(dataset, x, y));
+    }
+
+    public ScatterChartConfig buildData() {
         ScatterChartConfig config = new ScatterChartConfig();
-        config
-                .data()
-                .addDataset(new ScatterDataset().label("My First dataset").xAxisID("x-axis-1").yAxisID("y-axis-1"))
-                .addDataset(new ScatterDataset().label("My Second  dataset").xAxisID("x-axis-1").yAxisID("y-axis-2"))
-                .and();
+
+        List<String> datasets = data.stream().map(d -> d.dataset).distinct().collect(Collectors.toList());
+        datasets.stream().forEach(ds -> {
+            ScatterDataset lds = new ScatterDataset();
+            lds.label(ds);
+            lds.borderColor(ColorUtils.randomColor(.4));
+            lds.backgroundColor(ColorUtils.randomColor(.1));
+            lds.pointBorderColor(ColorUtils.randomColor(.7));
+            lds.pointBackgroundColor(ColorUtils.randomColor(.5));
+            lds.pointBorderWidth(1);
+
+            List<DataValue> datas = data.stream().filter(d -> d.getDataset().equals(ds)).collect(Collectors.toList());
+            for (DataValue dv : datas) {
+                lds.addData(dv.x, dv.y);
+            }
+            config.data().addDataset(lds);
+        });
+
+        return config;
+    }
+
+    public Component getChart() {
+        ScatterChartConfig config = buildData();
         config.
                 options()
                 .responsive(true)
@@ -33,26 +73,14 @@ public class ScatterLineChart {
                 .and()
                 .title()
                 .display(true)
-                .text("Chart.js Scatter Chart - Multi Axis")
+                .text(title)
                 .and()
                 .scales()
                 .add(Axis.X, new LinearScale().position(Position.BOTTOM).gridLines().zeroLineColor("rgba(0,0,0,1)").and())
                 .add(Axis.Y, new LinearScale().display(true).position(Position.LEFT).id("y-axis-1"))
-                .add(Axis.Y, new LinearScale().display(true).position(Position.RIGHT).id("y-axis-2").ticks().reverse(true).and().gridLines().drawOnChartArea(false).and())
+                //.add(Axis.Y, new LinearScale().display(true).position(Position.RIGHT).id("y-axis-2").ticks().reverse(true).and().gridLines().drawOnChartArea(false).and())
                 .and()
                 .done();
-
-        for (Dataset<?, ?> ds : config.data().getDatasets()) {
-            ScatterDataset lds = (ScatterDataset) ds;
-            lds.borderColor(ColorUtils.randomColor(.4));
-            lds.backgroundColor(ColorUtils.randomColor(.1));
-            lds.pointBorderColor(ColorUtils.randomColor(.7));
-            lds.pointBackgroundColor(ColorUtils.randomColor(.5));
-            lds.pointBorderWidth(1);
-            for (int i = 0; i < 7; i++) {
-                lds.addData(ChartUtils.randomScalingFactor(), ChartUtils.randomScalingFactor());
-            }
-        }
 
         ChartJs chart = new ChartJs(config);
         chart.setJsLoggingEnabled(true);

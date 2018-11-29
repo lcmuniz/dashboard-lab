@@ -2,7 +2,6 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.chart;
 
 import com.byteowls.vaadin.chartjs.ChartJs;
 import com.byteowls.vaadin.chartjs.config.LineChartConfig;
-import com.byteowls.vaadin.chartjs.data.Dataset;
 import com.byteowls.vaadin.chartjs.data.TimeLineDataset;
 import com.byteowls.vaadin.chartjs.options.InteractionMode;
 import com.byteowls.vaadin.chartjs.options.Position;
@@ -11,32 +10,80 @@ import com.byteowls.vaadin.chartjs.options.scale.LinearScale;
 import com.byteowls.vaadin.chartjs.options.scale.TimeScale;
 import com.byteowls.vaadin.chartjs.options.scale.TimeScaleOptions;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Component;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class TimeLineChart {
+public class TimeLineChart implements Chart {
 
     private static final long serialVersionUID = -4668420742225695694L;
 
+    @Getter @Setter
+    String title;
+
+    final List<DataValue> data = new ArrayList<>();
+
+    @Data
+    @AllArgsConstructor
+    class DataValue {
+        String dataset;
+        LocalDateTime time;
+        Double value;
+    }
+    public void addData(String dataset, LocalDateTime time, Double value) {
+        data.add(new DataValue(dataset, time, value));
+    }
+
+    public LineChartConfig buildData() {
+        LineChartConfig config = new LineChartConfig();
+        List<String> ds = data.stream().map(d -> d.dataset).distinct().collect(Collectors.toList());
+        ds.stream().forEach(dst -> {
+            TimeLineDataset lds = new TimeLineDataset();
+            lds.label(dst);
+            lds.fill(false);
+            lds.backgroundColor(ColorUtils.randomColor(0.7));
+            lds.borderColor(ColorUtils.randomColor(.4));
+            lds.backgroundColor(ColorUtils.randomColor(.1));
+            lds.pointBorderColor(ColorUtils.randomColor(.7));
+            lds.pointBackgroundColor(ColorUtils.randomColor(.5));
+            lds.pointBorderWidth(1);
+
+            List<DataValue> dvl = data.stream().filter(d -> d.dataset.equals(dst)).collect(Collectors.toList());
+
+            for(DataValue dv: dvl) {
+                lds.addData(dv.time, dv.value);
+            }
+            config.data().addDataset(lds);
+        });
+        return config;
+    }
+
     public Component getChart() {
 
-        LocalDateTime t = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
+        //LocalDateTime t = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
 
-        LineChartConfig config = new LineChartConfig();
+        LocalDateTime minDate = data.stream().map(d -> d.getTime()).min(LocalDateTime::compareTo).get();
+        LocalDateTime maxDate = data.stream().map(d -> d.getTime()).max(LocalDateTime::compareTo).get();
+
+        Double minValue = data.stream().mapToDouble(d -> d.getValue()).min().getAsDouble();
+        Double maxValue = data.stream().mapToDouble(d -> d.getValue()).max().getAsDouble();
+
+        LineChartConfig config = buildData();
         config.data()
-                .addDataset(new TimeLineDataset().label("My First dataset").fill(false))
-                .addDataset(new TimeLineDataset().label("My Second dataset").fill(false))
-                .addDataset(new TimeLineDataset().label("Hidden dataset").hidden(true))
                 .and()
                 .options()
                 .responsive(true)
                 .title()
                 .display(true)
-                .text("Chart.js Line Chart")
+                .text(title)
                 .and()
                 .tooltips()
                 .mode(InteractionMode.INDEX)
@@ -49,12 +96,12 @@ public class TimeLineChart {
                 .scales()
                 .add(Axis.X, new TimeScale()
                         .time()
-                        .min(t.minusHours(9))
-                        .max(t)
-                        .stepSize(2)
-                        .unit(TimeScaleOptions.Unit.HOUR)
+                        .min(minDate)
+                        .max(maxDate)
+                        //.stepSize(2)
+                        //.unit(TimeScaleOptions.Unit.HOUR)
                         .displayFormats()
-                        .hour("DD.MM HH:mm") // german date/time format
+                        //.hour("DD.MM HH:mm") // german date/time format
                         .and()
                         .and()
                 )
@@ -65,26 +112,12 @@ public class TimeLineChart {
                         .labelString("Value")
                         .and()
                         .ticks()
-                        .suggestedMin(-10)
-                        .suggestedMax(250)
+                        .suggestedMin(minValue)
+                        .suggestedMax(maxValue)
                         .and()
-                        .position(Position.RIGHT))
+                        .position(Position.LEFT))
                 .and()
                 .done();
-
-        // add random data for demo
-        for (Dataset<?, ?> ds : config.data().getDatasets()) {
-            TimeLineDataset lds = (TimeLineDataset) ds;
-            lds.borderColor(ColorUtils.randomColor(.4));
-            lds.backgroundColor(ColorUtils.randomColor(.1));
-            lds.pointBorderColor(ColorUtils.randomColor(.7));
-            lds.pointBackgroundColor(ColorUtils.randomColor(.5));
-            lds.pointBorderWidth(1);
-            for (int i = 0; i < 10; i++) {
-                lds.addData(t.minusHours(10).plusHours(i), ChartUtils.randomScalingFactor());
-            }
-            t = t.plusMinutes(15);
-        }
 
         ChartJs chart = new ChartJs(config);
         chart.setJsLoggingEnabled(true);
