@@ -107,6 +107,30 @@ public class InterSCityService {
 
     }
 
+    // GET /catalog/resources/search?description={description}
+    public Resource getResourceByDescription(String description) {
+
+        try {
+
+            val url = baseUrl + "catalog/resources/search?description="+description;
+            val list = new ArrayList<Resource>();
+            int i = 1;
+
+            val response = Unirest.get(url)
+                    .header("accept", "application/json")
+                    //.header("content-type", "application/json")
+                    .asJson().getBody().toString();
+            val resources = gson.fromJson(response, Resources.class);
+
+            if (resources.getResources().size() == 0) return null;
+            return resources.getResources().get(0);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     // GET /catalog/resources/{uuid}
     public Resource getResource(String uuid) {
 
@@ -178,8 +202,13 @@ public class InterSCityService {
     // POST /collector/resources/data
     public GetContextDataResponse getContextData(GetContextDataRequest request) {
         try {
+
+            if(request.getUuids().size() == 0) request.setUuids(null);
+            if(request.getCapabilities().size() == 0) request.setCapabilities(null);
+            if(request.getMatchers().size() == 0) request.setMatchers(null);
+
             val url = baseUrl + "collector/resources/data";
-            val jsonRequest = gson.toJson(request);
+            val jsonRequest = gson.toJson(request).replace("startDate", "start_date").replace("endDate", "end_date");
             val response = Unirest.post(url)
                     .header("accept", "application/json")
                     .header("content-type", "application/json")
@@ -194,6 +223,11 @@ public class InterSCityService {
     // POST /collector/resources/data/last
     public GetContextDataResponse getLastContextData(GetContextDataRequest request) {
         try {
+
+            if(request.getUuids().size() == 0) request.setUuids(null);
+            if(request.getCapabilities().size() == 0) request.setCapabilities(null);
+            if(request.getMatchers().size() == 0) request.setMatchers(null);
+
             val url = baseUrl + "collector/resources/data/last";
             val jsonRequest = gson.toJson(request);
             val response = Unirest.post(url)

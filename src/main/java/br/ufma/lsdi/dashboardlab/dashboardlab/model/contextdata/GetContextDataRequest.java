@@ -13,6 +13,6 @@ public class GetContextDataRequest {
     List<String> uuids = new ArrayList<>();
     List<String> capabilities = new ArrayList<>();
     Map<String, Object> matchers = new HashMap<>();
-    LocalDateTime startRange;
-    LocalDateTime endRange;
+    LocalDateTime startDate;
+    LocalDateTime endDate;
 }

@@ -16,48 +16,75 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ScatterLineChart {
 
     private static final long serialVersionUID = -4668420742225695694L;
 
+    double minx = 999999999999999999999999999999999f;
+    double maxx = -999999999999999999999999999999999f;
+    double miny = 999999999999999999999999999999999f;
+    double maxy = -999999999999999999999999999999999f;
+
     @Getter
     @Setter
     String title;
+
+    @Getter
+    @Setter
+    String x;
+
+    @Getter
+    @Setter
+    String y;
 
     final List<DataValue> data = new ArrayList<>();
 
     @Data
     @AllArgsConstructor
     class DataValue {
-        String dataset;
-        Double x;
-        Double y;
+        Object group;
+        String capability;
+        Double value;
     }
-    public void addData(String dataset, Double x, Double y) {
-        data.add(new DataValue(dataset, x, y));
+
+    public void addData(Object group, String capability, Double value) {
+        data.add(new DataValue(group, capability, value));
     }
 
     public ScatterChartConfig buildData() {
+
+        ScatterDataset lds = new ScatterDataset();
+        lds.label(x + " x " + y);
+        lds.borderColor(ColorUtils.randomColor(.4));
+        lds.backgroundColor(ColorUtils.randomColor(.1));
+        lds.pointBorderColor(ColorUtils.randomColor(.7));
+        lds.pointBackgroundColor(ColorUtils.randomColor(.5));
+        lds.pointBorderWidth(1);
+
+        Map<Object, List<DataValue>> g = data.stream().collect(Collectors.groupingBy(DataValue::getGroup));
+        for(Object l : g.keySet()) {
+
+            List<DataValue> list = g.get((l));
+            Optional<DataValue> ox = list.stream().filter(rd -> rd.getCapability().equals(x)).findFirst();
+            Optional<DataValue> oy = list.stream().filter(rd -> rd.getCapability().equals(y)).findFirst();
+
+            double xv = ox.isPresent() ? ox.get().value : 0;
+            double yv = oy.isPresent() ? oy.get().value : 0;
+
+            if (xv < minx) minx = xv;
+            if (xv > maxx) maxx = xv;
+            if (yv < miny) miny = yv;
+            if (yv > maxy) maxy = yv;
+
+            lds.addData(xv, yv);
+        }
+
         ScatterChartConfig config = new ScatterChartConfig();
-
-        List<String> datasets = data.stream().map(d -> d.dataset).distinct().collect(Collectors.toList());
-        datasets.stream().forEach(ds -> {
-            ScatterDataset lds = new ScatterDataset();
-            lds.label(ds);
-            lds.borderColor(ColorUtils.randomColor(.4));
-            lds.backgroundColor(ColorUtils.randomColor(.1));
-            lds.pointBorderColor(ColorUtils.randomColor(.7));
-            lds.pointBackgroundColor(ColorUtils.randomColor(.5));
-            lds.pointBorderWidth(1);
-
-            List<DataValue> datas = data.stream().filter(d -> d.getDataset().equals(ds)).collect(Collectors.toList());
-            for (DataValue dv : datas) {
-                lds.addData(dv.x, dv.y);
-            }
-            config.data().addDataset(lds);
-        });
+        config.data().addDataset(lds);
 
         return config;
     }
@@ -76,8 +103,8 @@ public class ScatterLineChart {
                 .text(title)
                 .and()
                 .scales()
-                .add(Axis.X, new LinearScale().position(Position.BOTTOM).gridLines().zeroLineColor("rgba(0,0,0,1)").and())
-                .add(Axis.Y, new LinearScale().display(true).position(Position.LEFT).id("y-axis-1"))
+                .add(Axis.X, new LinearScale().display(true).scaleLabel().display(true).labelString(x).and().position(Position.BOTTOM).gridLines().zeroLineColor("rgba(0,0,0,1)").and().ticks().suggestedMin(minx - 10).suggestedMax(maxx + 10).and())
+                .add(Axis.Y, new LinearScale().display(true).scaleLabel().display(true).labelString(y).and().position(Position.LEFT).id("y-axis-1").scaleLabel().and().ticks().suggestedMin(miny - 10).suggestedMax(maxy + 10).and())
                 //.add(Axis.Y, new LinearScale().display(true).position(Position.RIGHT).id("y-axis-2").ticks().reverse(true).and().gridLines().drawOnChartArea(false).and())
                 .and()
                 .done();

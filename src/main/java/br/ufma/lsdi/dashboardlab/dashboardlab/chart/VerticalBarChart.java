@@ -26,7 +26,7 @@ public class VerticalBarChart extends BarChart {
                 .text(title)
                 .and()
                 .scales()
-                .add(Axis.Y, new LinearScale().display(true).position(Position.LEFT).id("y-axis-1").gridLines().and())
+                .add(Axis.Y, new LinearScale().display(true).position(Position.LEFT).id("y-axis-1").gridLines().and().ticks().suggestedMin(0).and())
                 .and()
                 .done();
 

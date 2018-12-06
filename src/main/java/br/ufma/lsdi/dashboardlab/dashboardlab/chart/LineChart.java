@@ -18,10 +18,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LineChart {
@@ -33,11 +30,15 @@ public class LineChart {
     String title;
 
     @Getter @Setter
+    String groupType;
+
+    @Getter @Setter
     String XLabel = "";
     @Getter @Setter
     String YLabel = "Value";
 
 
+    final List<DataValue> rawdata = new ArrayList<>();
     final List<DataValue> data = new ArrayList<>();
 
     @Data
@@ -48,10 +49,34 @@ public class LineChart {
         Double value;
     }
     public void addData(String group, String dataset, Double value) {
-        data.add(new DataValue(group, dataset, value));
+        rawdata.add(new DataValue(group, dataset, value));
     }
 
     public LineChartConfig buildData() {
+
+        Map<String, Map<String, DoubleSummaryStatistics>> map1 =
+                rawdata.stream().collect(
+                        Collectors.groupingBy(DataValue::getGroup,
+                                Collectors.groupingBy(DataValue::getDataset,
+                                        Collectors.summarizingDouble(DataValue::getValue))));
+
+        for (String s1 : map1.keySet()) {
+            Map<String, DoubleSummaryStatistics> map2 = map1.get(s1);
+            for (String s2 : map2.keySet()) {
+                if (groupType.equals("Sum")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getSum()));
+                } else if (groupType.equals("Count")) {
+                    data.add(new DataValue(s1, s2, (double) map2.get(s2).getCount()));
+                } else if (groupType.equals("Avg")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getAverage()));
+                } else if (groupType.equals("Min")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getMin()));
+                } else if (groupType.equals("Max")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getMax()));
+                }
+            }
+        }
+
         LineChartConfig config = new LineChartConfig();
 
         List<String> labels = data.stream().map(d -> d.group).distinct().collect(Collectors.toList());
@@ -79,12 +104,10 @@ public class LineChart {
 
     public Component getChart() {
 
-        double min = data.stream().mapToDouble(d -> d.value).min().getAsDouble();
-        double max = data.stream().mapToDouble(d -> d.value).max().getAsDouble();
+        double min = rawdata.stream().mapToDouble(d -> d.value).min().getAsDouble();
+        double max = rawdata.stream().mapToDouble(d -> d.value).max().getAsDouble();
         min = Math.floor(min / 10) * 10;
         max = Math.ceil(max / 10) * 10;
-        System.out.println(min);
-        System.out.println(max);
 
         LineChartConfig lineConfig = buildData();
         lineConfig.data()

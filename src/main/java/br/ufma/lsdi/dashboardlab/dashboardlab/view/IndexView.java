@@ -39,6 +39,8 @@ public class IndexView extends VerticalLayout {
         Button button = new Button("Teste");
         button.addClickListener(e -> {
 
+
+
             TimeLineChart chart = new TimeLineChart();
             chart.setTitle("Meu Gráfico".toUpperCase());
             chart.addData("temperature", LocalDateTime.now(), 1.0);

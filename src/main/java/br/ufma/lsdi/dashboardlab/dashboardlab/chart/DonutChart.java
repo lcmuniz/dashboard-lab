@@ -10,16 +10,18 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DonutChart {
 
     private static final long serialVersionUID = 4894923343920891837L;
 
+    final List<DataValue> rawdata = new ArrayList<>();
     final List<DataValue> data = new ArrayList<>();
+
+    @Getter @Setter
+    String groupType;
 
     @Getter
     @Setter
@@ -33,10 +35,34 @@ public class DonutChart {
         Double value;
     }
     public void addData(String dataset, String group, Double value) {
-        data.add(new DataValue(dataset, group, value));
+        rawdata.add(new DataValue(dataset, group, value));
     }
 
     public DonutChartConfig buildData() {
+
+        Map<String, Map<String, DoubleSummaryStatistics>> map1 =
+                rawdata.stream().collect(
+                        Collectors.groupingBy(DataValue::getDataset,
+                                Collectors.groupingBy(DataValue::getGroup,
+                                        Collectors.summarizingDouble(DataValue::getValue))));
+
+        for (String s1 : map1.keySet()) {
+            Map<String, DoubleSummaryStatistics> map2 = map1.get(s1);
+            for (String s2 : map2.keySet()) {
+                if (groupType.equals("Sum")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getSum()));
+                } else if (groupType.equals("Count")) {
+                    data.add(new DataValue(s1, s2, (double) map2.get(s2).getCount()));
+                } else if (groupType.equals("Avg")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getAverage()));
+                } else if (groupType.equals("Min")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getMin()));
+                } else if (groupType.equals("Max")) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getMax()));
+                }
+            }
+        }
+
         DonutChartConfig config = new DonutChartConfig();
         List<String> labels = data.stream().map(d -> d.group).distinct().collect(Collectors.toList());
         config.data().labelsAsList(labels);

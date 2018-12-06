@@ -26,7 +26,13 @@ public class ConsoleApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //resources();
+
+
+
+//        for (int i = 1; i <= 135; i++) {
+//            System.out.println(UUID.randomUUID().toString());
+//        }
+        resources();
        // crimes_culposos();
         //crimes_dolosos();
     }

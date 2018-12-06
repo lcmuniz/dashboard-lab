@@ -1,6 +1,8 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.ApplicationMenuBar;
+import br.ufma.lsdi.dashboardlab.dashboardlab.repository.ContextDataQueryRepository;
+import br.ufma.lsdi.dashboardlab.dashboardlab.repository.ResourceQueryRepository;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Widgetset;
@@ -20,9 +22,15 @@ public class IndexUI extends UI {
     private Panel contentPanel;
 
     private InterSCityService interSCityService;
+    private ResourceQueryRepository resourceQueryRepository;
+    private ContextDataQueryRepository contextDataQueryRepository;
 
-    public IndexUI(InterSCityService interSCityService) {
+    public IndexUI(InterSCityService interSCityService,
+                   ResourceQueryRepository resourceQueryRepository,
+                   ContextDataQueryRepository contextDataQueryRepository) {
         this.interSCityService = interSCityService;
+        this.resourceQueryRepository = resourceQueryRepository;
+        this.contextDataQueryRepository = contextDataQueryRepository;
     }
 
     @Override
@@ -33,7 +41,7 @@ public class IndexUI extends UI {
 
         contentPanel.setContent(new IndexView(interSCityService, this));
 
-        ApplicationMenuBar applicationMenuBar = new ApplicationMenuBar(interSCityService, contentPanel,  this);
+        ApplicationMenuBar applicationMenuBar = new ApplicationMenuBar(interSCityService, resourceQueryRepository, contextDataQueryRepository, contentPanel,  this);
         applicationMenuBar.setHeightUndefined();
 
         VerticalLayout verticalLayout = new VerticalLayout();

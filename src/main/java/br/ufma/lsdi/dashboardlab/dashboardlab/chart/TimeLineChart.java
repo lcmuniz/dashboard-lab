@@ -8,26 +8,26 @@ import com.byteowls.vaadin.chartjs.options.Position;
 import com.byteowls.vaadin.chartjs.options.scale.Axis;
 import com.byteowls.vaadin.chartjs.options.scale.LinearScale;
 import com.byteowls.vaadin.chartjs.options.scale.TimeScale;
-import com.byteowls.vaadin.chartjs.options.scale.TimeScaleOptions;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.VerticalLayout;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TimeLineChart implements Chart {
+public class TimeLineChart {
 
     private static final long serialVersionUID = -4668420742225695694L;
 
     @Getter @Setter
     String title;
+
 
     final List<DataValue> data = new ArrayList<>();
 
