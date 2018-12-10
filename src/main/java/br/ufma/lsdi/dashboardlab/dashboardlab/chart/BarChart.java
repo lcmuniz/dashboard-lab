@@ -4,7 +4,6 @@ import com.byteowls.vaadin.chartjs.config.BarChartConfig;
 import com.byteowls.vaadin.chartjs.data.BarDataset;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -48,7 +47,10 @@ public abstract class BarChart implements IBarChart {
         for (String s1 : map1.keySet()) {
             Map<String, DoubleSummaryStatistics> map2 = map1.get(s1);
             for (String s2 : map2.keySet()) {
-                if (groupType.equals("Sum")) {
+                if (groupType == null) {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getAverage()));
+                }
+                else if (groupType.equals("Sum")) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getSum()));
                 } else if (groupType.equals("Count")) {
                     data.add(new DataValue(s1, s2, (double) map2.get(s2).getCount()));
@@ -58,6 +60,9 @@ public abstract class BarChart implements IBarChart {
                     data.add(new DataValue(s1, s2, map2.get(s2).getMin()));
                 } else if (groupType.equals("Max")) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getMax()));
+                }
+                else {
+                    data.add(new DataValue(s1, s2, map2.get(s2).getAverage()));
                 }
             }
         }

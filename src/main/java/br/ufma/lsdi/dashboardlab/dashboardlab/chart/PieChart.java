@@ -41,7 +41,10 @@ public class PieChart {
                         Collectors.summarizingDouble(DataValue::getValue)));
 
         for (String s1 : map1.keySet()) {
-            if (groupType.equals("Sum")) {
+            if (groupType == null) {
+                data.add(new DataValue(s1, map1.get(s1).getAverage()));
+            }
+            else if (groupType.equals("Sum")) {
                 data.add(new DataValue(s1, map1.get(s1).getSum()));
             } else if (groupType.equals("Count")) {
                 data.add(new DataValue(s1, (double) map1.get(s1).getCount()));
@@ -51,6 +54,9 @@ public class PieChart {
                 data.add(new DataValue(s1, map1.get(s1).getMin()));
             } else if (groupType.equals("Max")) {
                 data.add(new DataValue(s1, map1.get(s1).getMax()));
+            }
+            else {
+                data.add(new DataValue(s1, map1.get(s1).getAverage()));
             }
         }
 

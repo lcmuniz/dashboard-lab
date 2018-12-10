@@ -63,6 +63,7 @@ public class SelectWithTextField extends VerticalLayout {
 
     }
 
+    @SuppressWarnings("deprecation")
     private void removeShortcut(TextField text) {
             text.removeShortcutListener(enterListener);
     }
@@ -71,6 +72,7 @@ public class SelectWithTextField extends VerticalLayout {
         text.addShortcutListener(enterListener);
     }
 
+    @SuppressWarnings("deprecation")
     public void removeListShortcut() {
         list.removeShortcutListener(deleteListener);
     }

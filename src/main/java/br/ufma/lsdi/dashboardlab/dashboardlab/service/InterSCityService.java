@@ -229,7 +229,7 @@ public class InterSCityService {
             if(request.getMatchers().size() == 0) request.setMatchers(null);
 
             val url = baseUrl + "collector/resources/data/last";
-            val jsonRequest = gson.toJson(request);
+            val jsonRequest = gson.toJson(request).replace("startDate", "start_date").replace("endDate", "end_date");
             val response = Unirest.post(url)
                     .header("accept", "application/json")
                     .header("content-type", "application/json")

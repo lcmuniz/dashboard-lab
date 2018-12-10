@@ -2,19 +2,19 @@ package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
 import br.ufma.lsdi.dashboardlab.dashboardlab.chart.*;
 import br.ufma.lsdi.dashboardlab.dashboardlab.component.SelectWithTextField;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.ChartType;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.GroupTimeType;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.Resource;
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.SummaryType;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.contextdata.GetContextDataRequest;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.contextdata.GetContextDataResponse;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.contextdata.GetDataContextResource;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.event.ShortcutListener;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import lombok.Data;
 import lombok.val;
 
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -53,6 +53,9 @@ public class ChartView extends VerticalLayout {
     private TextField x_bubble;
     private TextField y_bubble;
     private HorizontalLayout line_bubble;
+    private TextField y_time;
+    private ComboBox<String> group_time;
+    private HorizontalLayout line_time;
 
     public ChartView(InterSCityService interSCityService, IndexUI indexUI) {
 
@@ -156,14 +159,21 @@ public class ChartView extends VerticalLayout {
         step4Tab.addComponent(new HorizontalLayout(step4previousButton, step4nextButton));
 
         val chartTypesList =
-                Arrays.asList("Vertical Bar", "Horizontal Bar",
-                        "Line", "Scatter Line", "Stepped Line",
-                        "Pie", "Donut", "Time Line", "Bubble");
+                Arrays.asList(
+                        ChartType.VERTICAL_BAR,
+                        ChartType.HORIZONTAL_BAR,
+                        ChartType.LINE,
+                        ChartType.SCATTER_LINE,
+                        ChartType.STEPPED_LINE,
+                        ChartType.PIE,
+                        ChartType.DONUT,
+                        ChartType.TIME_LINE,
+                        ChartType.BUBBLE);
 
         chartTypesCombobox = new ComboBox<>("Chart type");
         chartTypesCombobox.setSizeFull();
         chartTypesCombobox.setItems(chartTypesList);
-        chartTypesCombobox.setValue("Vertical Bar");
+        chartTypesCombobox.setValue(ChartType.VERTICAL_BAR);
         chartTypesCombobox.addValueChangeListener(e ->
                 onChangeChartType(chartTypesCombobox.getValue()));
 
@@ -223,9 +233,19 @@ public class ChartView extends VerticalLayout {
         line_bubble.setVisible(false);
 
         groupType = new RadioButtonGroup<>();
-        groupType.setItems("Sum", "Count", "Avg", "Min", "Max");
-        groupType.setValue("Sum");
+        groupType.setItems(SummaryType.SUM, SummaryType.COUNT, SummaryType.AVERAGE, SummaryType.MIN, SummaryType.MAX);
+        groupType.setValue(SummaryType.SUM);
         groupType.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+
+        y_time = new TextField("Y");
+        y_time.setSizeFull();
+        group_time = new ComboBox<>("Group time by");
+        group_time.setItems(Arrays.asList(GroupTimeType.HOUR, GroupTimeType.DAY, GroupTimeType.MONTH, GroupTimeType.YEAR));
+        group_time.setSelectedItem(GroupTimeType.MONTH);
+        group_time.setSizeFull();
+        line_time = new HorizontalLayout();
+        line_time.setSizeFull();
+        line_time.addComponents(group_time, y_time);
 
         Button plotButton = new Button("Plot Chart");
         plotButton.addClickListener(e -> plotChart(chartTypesCombobox));
@@ -237,6 +257,7 @@ public class ChartView extends VerticalLayout {
         step5Tab.addComponent(gv);
         step5Tab.addComponent(line_sl);
         step5Tab.addComponent(line_bubble);
+        step5Tab.addComponent(line_time);
         step5Tab.addComponent(groupType);
 
         val step5previousButton = new Button("<< Previous");
@@ -259,51 +280,6 @@ public class ChartView extends VerticalLayout {
         vl.addComponent(label);
         vl.addComponent(tabs);
 
-        if (1==1) return vl;
-
-        TextField filter = new TextField("Filter");
-        filter.setSizeFull();
-        TextField groupSL = new TextField("Group");
-        groupSL.setSizeFull();
-        HorizontalLayout filterLayout = new HorizontalLayout();
-        filterLayout.addComponents(filter, groupSL);
-        filterLayout.setSizeFull();
-        filterLayout.setVisible(false);
-
-        TextField xAxis = new TextField("X");
-        xAxis.setSizeFull();
-        TextField yAxis = new TextField("Y");
-        yAxis.setSizeFull();
-        HorizontalLayout axes = new HorizontalLayout();
-        axes.setSizeFull();
-        axes.addComponents(xAxis, yAxis);
-        axes.setVisible(false);
-
-
-        DateTimeField start = new DateTimeField("Start Range");
-        start.setSizeFull();
-
-        DateTimeField end = new DateTimeField("End Range");
-        end.setSizeFull();
-
-        start.setValue(LocalDateTime.of(2018, 01, 01, 00, 00));
-        end.setValue(LocalDateTime.of(2018, 12, 31, 00, 00));
-
-        HorizontalLayout dates =  new HorizontalLayout();
-        dates.addComponents(start, end);
-        dates.setSizeFull();
-
-        vl.addComponent(label);
-        vl.addComponent(chartTypesCombobox);
-        vl.addComponent(title);
-        vl.addComponent(y);
-        vl.addComponent(filterLayout);
-        vl.addComponent(x);
-        vl.addComponent(axes);
-        vl.addComponent(groupType);
-        vl.addComponent(dates);
-        vl.addComponent(plotButton);
-
         return vl;
     }
 
@@ -317,30 +293,67 @@ public class ChartView extends VerticalLayout {
 
         List<GetDataContextResource> resources = searchResources();
 
-        if (chartTypesCombobox.getValue().equals("Vertical Bar")) {
+        if (chartTypesCombobox.getValue().equals(ChartType.VERTICAL_BAR)) {
             plotVerticalBarChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Horizontal Bar")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.HORIZONTAL_BAR)) {
             plotHorizontalBarChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Pie")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.PIE)) {
             plotPieChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Donut")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.DONUT)) {
             plotDonutChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Line")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.LINE)) {
             plotLineChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Stepped Line")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.STEPPED_LINE)) {
             plotSteppedLineChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Scatter Line")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.SCATTER_LINE)) {
             plotScatterLineChart(resources);
         }
-        else if (chartTypesCombobox.getValue().equals("Bubble")) {
+        else if (chartTypesCombobox.getValue().equals(ChartType.BUBBLE)) {
             plotBubbleChart(resources);
         }
+        else if (chartTypesCombobox.getValue().equals(ChartType.TIME_LINE)) {
+            plotTimeLineChart(resources);
+        }
+    }
+
+    private void plotTimeLineChart(List<GetDataContextResource> resources) {
+
+        TimeLineChart chart = new TimeLineChart();
+        chart.setTitle(title.getValue().toUpperCase());
+        chart.setGroupType(groupType.getValue());
+        chart.setGroupTime(group_time.getValue());
+
+        String[] ys = y_time.getValue().replace(" ", "").split(",");
+
+        for (GetDataContextResource resource : resources) {
+            Map<String, List<Map<String, Object>>> capabilitiesMap = resource.getCapabilities();
+
+            Set<String> capabilitiesList = capabilitiesMap.keySet();
+            for (String capabilityName : capabilitiesList) {
+
+                List<Map<String, Object>> mapList = capabilitiesMap.get(capabilityName);
+
+                mapList.stream().forEach(map -> {
+                    for(String y : ys) {
+                        if (map.get(y) != null) {
+                            chart.addData(y, getDate((String) map.get("date")), (Double) map.get(y));
+                        }
+                    }
+
+                });
+
+            }
+
+        }
+
+        chartLayout.removeAllComponents();
+        chartLayout.addComponent(chart.getChart());
     }
 
     private List<GetDataContextResource> searchResources() {
@@ -362,9 +375,16 @@ public class ChartView extends VerticalLayout {
         request.setStartDate(startDate.getValue());
         request.setEndDate(endDate.getValue());
 
-        GetContextDataResponse response = interSCityService.getLastContextData(request);
+        if (chartTypesCombobox.getValue().equals(ChartType.TIME_LINE)) {
+            GetContextDataResponse response = interSCityService.getContextData(request);
+            return response.getResources();
+        }
+        else {
+            GetContextDataResponse response = interSCityService.getLastContextData(request);
+            return response.getResources();
+        }
 
-        return response.getResources();
+
     }
 
     private void plotBubbleChart(List<GetDataContextResource> resources) {
@@ -600,171 +620,38 @@ public class ChartView extends VerticalLayout {
     }
 
     private void onChangeChartType(String chartType) {
-        xy.setVisible(true);
+        xy.setVisible(false);
         gv.setVisible(false);
         line_sl.setVisible(false);
         line_bubble.setVisible(false);
-        if (chartType.equals("Vertical Bar")) {
+        line_time.setVisible(false);
+        if (chartType.equals(ChartType.VERTICAL_BAR)) {
+            xy.setVisible(true);
         }
-        else if (chartType.equals("Horizontal Bar")) {
+        else if (chartType.equals(ChartType.HORIZONTAL_BAR)) {
+            xy.setVisible(true);
         }
-        else if (chartType.equals("Line")) {
+        else if (chartType.equals(ChartType.LINE)) {
+            xy.setVisible(true);
         }
-        else if (chartType.equals("Scatter Line")) {
-            xy.setVisible(false);
-            gv.setVisible(false);
+        else if (chartType.equals(ChartType.SCATTER_LINE)) {
             line_sl.setVisible(true);
-            line_bubble.setVisible(false);
         }
-        else if (chartType.equals("Stepped Line")) {
+        else if (chartType.equals(ChartType.STEPPED_LINE)) {
+            xy.setVisible(true);
         }
-        else if (chartType.equals("Pie")) {
-            xy.setVisible(false);
+        else if (chartType.equals(ChartType.PIE)) {
             gv.setVisible(true);
-            line_sl.setVisible(false);
-            line_bubble.setVisible(false);
         }
-        else if (chartType.equals("Donut")) {
-            xy.setVisible(false);
+        else if (chartType.equals(ChartType.DONUT)) {
             gv.setVisible(true);
-            line_sl.setVisible(false);
-            line_bubble.setVisible(false);
         }
-//        else if (chartType.equals("Time Line")) {
-//
-//        }
-        else if (chartType.equals("Bubble")) {
-            xy.setVisible(false);
-            gv.setVisible(false);
-            line_sl.setVisible(false);
+        else if (chartType.equals(ChartType.TIME_LINE)) {
+            line_time.setVisible(true);
+        }
+        else if (chartType.equals(ChartType.BUBBLE)) {
             line_bubble.setVisible(true);
         }
-
-    }
-
-    private void x() {
-
-        TabSheet tabSheet = new TabSheet();
-        tabSheet.setSizeFull();
-
-        VerticalLayout tab1 = new VerticalLayout();
-        tab1.setSpacing(true);
-        tab1.setMargin(true);
-
-        VerticalLayout tab2 = new VerticalLayout();
-        tab2.setSpacing(true);
-        tab2.setMargin(true);
-
-        VerticalLayout tab3 = new VerticalLayout();
-        tab3.setSpacing(true);
-        tab3.setMargin(true);
-
-        tabSheet.addTab(tab1).setCaption("1 - Resources");
-        tabSheet.addTab(tab2).setCaption("2 - Capabilities");
-        tabSheet.addTab(tab3).setCaption("3 - Context Data");
-
-        //vl.addComponent(tabSheet);
-
-        ListSelect<String> capabilityListSelect = new ListSelect<>("Capabilities");
-        capabilityListSelect .setSizeFull();
-
-        List<Resource> resources = interSCityService.getAllResources().stream().sorted(Comparator.comparing(Resource::getDescription)).collect(Collectors.toList());
-
-        ListSelect<Resource> resourceListSelect = new ListSelect<>("Resources");
-        resourceListSelect.setSizeFull();
-        resourceListSelect.setItems(resources);
-        resourceListSelect.addValueChangeListener(e -> {
-            List<List<String>> list = resourceListSelect.getSelectedItems().stream()
-                    .map(item -> item.getCapabilities()).collect(Collectors.toList());
-            Set<String> capabilitiesSet = list.stream().flatMap(x -> x.stream()).collect(Collectors.toSet());
-            List<String> capabilities = new ArrayList<>(capabilitiesSet);
-            capabilities = capabilities.stream().sorted().collect(Collectors.toList());
-            capabilityListSelect.setItems(capabilities);
-        });
-
-        Button button1next = new Button("Next >>");
-        button1next.addClickListener(e -> tabSheet.setSelectedTab(tab2));
-
-        tab1.addComponent(resourceListSelect);
-        tab1.addComponent(button1next);
-
-
-        Button button2previous = new Button("<< Previous");
-        button2previous.addClickListener(e -> tabSheet.setSelectedTab(tab1));
-        Button button2next = new Button("Next >>");
-        button2next.addClickListener(e -> tabSheet.setSelectedTab(tab3));
-
-        tab2.addComponent(capabilityListSelect);
-        tab2.addComponent(new HorizontalLayout(button2previous, button2next));
-
-        capabilityListSelect.addValueChangeListener(e -> {
-            System.out.println(capabilityListSelect.getSelectedItems());
-        });
-
-        TextField contextDataNameTextField = new TextField("Context Data Property: ");
-        contextDataNameTextField.setSizeFull();
-        RadioButtonGroup<String> actionsRadio = new RadioButtonGroup<>();
-        actionsRadio.setItems("Sum", "Count", "Avg");
-        actionsRadio.setValue("Sum");
-        actionsRadio.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
-
-        Set<String> items = new HashSet<>();
-        ListSelect<String> contextDataNameListSelect = new ListSelect<>();
-
-        TextField titleTextField = new TextField("Chart Title");
-        titleTextField.setSizeFull();
-
-        val chartTypesList =
-                Arrays.asList("Vertical Bar", "Horizontal Bar",
-                        "Line", "Scatter Line", "Stepped Line",
-                        "Pie", "Donut", "Timeline", "Bubble");
-
-        ComboBox<String> chartTypesCombobox = new ComboBox<>();
-        chartTypesCombobox.setSizeFull();
-        chartTypesCombobox.setItems(chartTypesList);
-        chartTypesCombobox.setValue("Vertical Bar");
-
-        Button button3previous = new Button("<< Previous");
-        button3previous.addClickListener(e -> tabSheet.setSelectedTab(tab2));
-        Button button3next = new Button("Plot Chart >>");
-        button3next.addClickListener(e ->
-                plotChart1(resourceListSelect,
-                        capabilityListSelect,
-                        contextDataNameTextField.getValue(),
-                        actionsRadio.getValue(),
-                        titleTextField.getValue(),
-                        chartTypesCombobox.getValue()));
-
-
-        contextDataNameListSelect.setSizeFull();
-        contextDataNameListSelect.addShortcutListener(new ShortcutListener("", ShortcutAction.KeyCode.DELETE, null) {
-            @Override
-            public void handleAction(Object sender, Object target) {
-                items.removeAll(contextDataNameListSelect.getSelectedItems());
-                contextDataNameListSelect.setItems(items);
-            }
-        });
-
-        TextField textField = new TextField("Context Data Name");
-        textField.setSizeFull();
-        textField.setPlaceholder("Enter context data name");
-        textField.addShortcutListener(new ShortcutListener("", ShortcutAction.KeyCode.ENTER, null) {
-            @Override
-            public void handleAction(Object sender, Object target) {
-                items.add(textField.getValue());
-                textField.clear();
-                contextDataNameListSelect.setItems(items);
-            }
-        });
-
-
-        tab3.addComponent(contextDataNameTextField);
-        tab3.addComponent(actionsRadio);
-        tab3.addComponent(titleTextField);
-        tab3.addComponent(chartTypesCombobox);
-
-        tab3.addComponent(new HorizontalLayout(button3previous, button3next));
-
 
     }
 
@@ -780,154 +667,6 @@ public class ChartView extends VerticalLayout {
         }
         public Double getDoubleValue() {
             return (Double) value;
-        }
-    }
-
-    private void plotChart1(ListSelect<Resource> resourceListSelect,
-                           ListSelect<String> capabilityListSelect,
-                           String property, String action, String title,
-                           String chartType) {
-
-        if (chartType.equals("Vertical Bar")) {
-            plotChartV(resourceListSelect,
-                    capabilityListSelect,
-                    property, action, title);
-        }
-        else if (chartType.equals("Horizontal Bar")) {
-            plotChartH(resourceListSelect,
-                    capabilityListSelect,
-                    property, action, title);
-        }
-        else if (chartType.equals("Line")) {
-            val chart = new LineChart();
-            chartLayout.removeAllComponents();
-            chartLayout.addComponent(chart.getChart());
-        }
-        else if (chartType.equals("Scatter Line")) {
-            val chart = new ScatterLineChart();
-            chartLayout.removeAllComponents();
-            chartLayout.addComponent(chart.getChart());
-        }
-        else if (chartType.equals("Stepped Line")) {
-            val chart = new SteppedLineChart();
-            chartLayout.removeAllComponents();
-            chartLayout.addComponent(chart.getChart());
-        }
-        else if (chartType.equals("Pie")) {
-            val chart = new PieChart();
-            chartLayout.removeAllComponents();
-            chartLayout.addComponent(chart.getChart());
-        }
-        else if (chartType.equals("Donut")) {
-            val chart = new DonutChart();
-            chartLayout.removeAllComponents();
-            chartLayout.addComponent(chart.getChart());
-        }
-        else if (chartType.equals("Timeline")) {
-            plotChartT(resourceListSelect,
-                    capabilityListSelect,
-                    property, action, title);
-        }
-        else if (chartType.equals("Bubble")) {
-            val chart = new BubbleChart();
-            chartLayout.removeAllComponents();
-            chartLayout.addComponent(chart.getChart());
-        }
-
-    }
-
-    private void plotChartV(ListSelect<Resource> resourceListSelect,
-                           ListSelect<String> capabilityListSelect,
-                           String property, String action, String title) {
-
-        Map<String, String> map = new HashMap<>();
-        resourceListSelect.getSelectedItems().stream().forEach(r ->
-                map.put(r.getUuid(), r.getDescription())
-        );
-        List<String> resourceNames = new ArrayList<>(map.values());
-        List<String> uuids = resourceListSelect.getSelectedItems().stream().map(r -> r.getUuid()).collect(Collectors.toList());
-        List<String> capabilities = new ArrayList<>(capabilityListSelect.getSelectedItems());
-        List<String> values = new ArrayList<>();
-        values.add(property);
-
-        GetContextDataRequest request = new GetContextDataRequest();
-        request.setUuids(uuids);
-        request.setCapabilities(capabilities);
-
-        GetContextDataResponse response = interSCityService.getContextData(request);
-
-        List<PlotData> plotDatas = new ArrayList<>();
-        for (GetDataContextResource resource : response.getResources()){
-            for (String key : resource.getCapabilities().keySet()) {
-                List<Map<String, Object>> contextDatas = resource.getCapabilities().get(key);
-                for (Map<String, Object> contextData : contextDatas) {
-                    for(String dataKey : contextData.keySet()) {
-                        if (values.contains(dataKey)) {
-                            PlotData data = new PlotData();
-                            data.setResource(map.get(resource.getUuid()));
-                            data.setCapability(key);
-                            data.setKey(dataKey);
-                            data.setValue(contextData.get(dataKey));
-                            plotDatas.add(data);
-                        }
-                    }
-                }
-            }
-        }
-
-        val chart = new VerticalBarChart();
-
-
-        if (action.equals("Sum")) {
-            Map<String, Map<String, Map<String, Double>>> result = plotDatas.stream().collect(
-                    Collectors.groupingBy(PlotData::getCapability,
-                            Collectors.groupingBy(PlotData::getResource,
-                                    Collectors.groupingBy(PlotData::getKey,
-                                            Collectors.summingDouble(PlotData::getDoubleValue)))));
-            createDatasetsDouble(resourceNames, capabilities, values, result, chart);
-        }
-        else if (action.equals("Count")) {
-            Map<String, Map<String, Map<String, Long>>> result = plotDatas.stream().collect(
-                    Collectors.groupingBy(PlotData::getCapability,
-                            Collectors.groupingBy(PlotData::getResource,
-                                    Collectors.groupingBy(PlotData::getKey,
-                                            Collectors.counting()))));
-            createDatasetsLong(resourceNames, capabilities, values, result, chart);
-        }
-        else if (action.equals("Avg")) {
-            Map<String, Map<String, Map<String, Double>>> result = plotDatas.stream().collect(
-                    Collectors.groupingBy(PlotData::getCapability,
-                            Collectors.groupingBy(PlotData::getResource,
-                                    Collectors.groupingBy(PlotData::getKey,
-                                            Collectors.averagingDouble(PlotData::getDoubleValue)))));
-            createDatasetsDouble(resourceNames, capabilities, values, result, chart);
-        }
-
-        String[] labels = resourceNames.toArray(new String[resourceNames.size()]);
-
-        //chart.setLabels(labels);
-        chart.setTitle(title);
-        //chart.setYLabel("Value");
-
-        chartLayout.removeAllComponents();
-        chartLayout.addComponent(chart.getChart());
-    }
-
-    private void createDatasetsDouble(List<String> resourceNames, List<String> capabilities, List<String> values, Map<String, Map<String, Map<String, Double>>> result, IBarChart chart) {
-        for (String capabilityName: capabilities) {
-            Map<String, Map<String, Double>> resources = result.get(capabilityName);
-            List<Double> data = new ArrayList<>();
-            for (String resourceName : resourceNames) {
-                Map<String, Double> valuesList = resources.get(resourceName);
-                for (String val : values) {
-                    Double value = valuesList.get(val);
-                    data.add(value);
-                }
-            }
-            //val dataset1 = new VerticalBarChart.DatasetX();
-            //dataset1.setLabel(capabilityName);
-            //dataset1.setData(data);
-            //chart.addDatasetX(dataset1);
         }
     }
 
@@ -978,148 +717,6 @@ public class ChartView extends VerticalLayout {
         }
     }
 
-    private void createDatasetsLong(List<String> resourceNames, List<String> capabilities, List<String> values, Map<String, Map<String, Map<String, Long>>> result, IBarChart chart) {
-        for (String capabilityName: capabilities) {
-            Map<String, Map<String, Long>> resources = result.get(capabilityName);
-            List<Double> data = new ArrayList<>();
-            for (String resourceName : resourceNames) {
-                Map<String, Long> valuesList = resources.get(resourceName);
-                for (String val : values) {
-                    Double value = (double) valuesList.get(val);
-                    data.add(value);
-                }
-            }
-            //val dataset1 = new VerticalBarChart.DatasetX();
-            //dataset1.setLabel(capabilityName);
-            //dataset1.setData(data);
-            //chart.addDatasetX(dataset1);
-        }
-    }
-
-
-
-    private void createVerticalBarForm(VerticalLayout vl) {
-
-        TextField labels = new TextField("Labels");
-        labels.setSizeFull();
-
-        Button button = new Button("Plot Chart");
-        button.addClickListener(e -> createVerticalBarChart(labels.getValue()));
-
-        vl.addComponent(labels);
-        vl.addComponent(button);
-    }
-
-    private void createVerticalBarChart(String labels) {
-
-        GetContextDataRequest request = new GetContextDataRequest();
-        request.getCapabilities().add("crime_doloso_lc");
-        GetContextDataResponse response = interSCityService.getContextData(request);
-
-        for (GetDataContextResource resource : response.getResources()){
-            for (String key : resource.getCapabilities().keySet()) {
-                List<Map<String, Object>> value = resource  .getCapabilities().get(key);
-            }
-        }
-
-        val chart = new VerticalBarChart();
-
-        //val dataset1 = new VerticalBarChart.DatasetX();
-        //dataset1.setLabel("data1");
-        //dataset1.setData(Arrays.asList(3.0,3.0,3.0,0.0));
-
-        //val dataset2 = new VerticalBarChart.DatasetX();
-        //dataset2.setLabel("data2");
-        //dataset2.setData(Arrays.asList(3.0,2.0,2.0));
-
-        //chart.addDatasetX(dataset1);
-        //chart.addDatasetX(dataset2);
-
-        //chart.setLabels(Arrays.asList("Teste1","Teste2","Teste3"));
-        chart.setTitle("Okokok");
-        //chart.setYLabel("Dasdasd");
-
-        chartLayout.removeAllComponents();
-        chartLayout.addComponent(chart.getChart());
-    }
-
-    private void plotChartH(ListSelect<Resource> resourceListSelect,
-                            ListSelect<String> capabilityListSelect,
-                            String property, String action, String title) {
-
-        Map<String, String> map = new HashMap<>();
-        resourceListSelect.getSelectedItems().stream().forEach(r ->
-                map.put(r.getUuid(), r.getDescription())
-        );
-        List<String> resourceNames = new ArrayList<>(map.values());
-        List<String> uuids = resourceListSelect.getSelectedItems().stream().map(r -> r.getUuid()).collect(Collectors.toList());
-        List<String> capabilities = new ArrayList<>(capabilityListSelect.getSelectedItems());
-        List<String> values = new ArrayList<>();
-        values.add(property);
-
-        GetContextDataRequest request = new GetContextDataRequest();
-        request.setUuids(uuids);
-        request.setCapabilities(capabilities);
-
-        GetContextDataResponse response = interSCityService.getContextData(request);
-
-        List<PlotData> plotDatas = new ArrayList<>();
-        for (GetDataContextResource resource : response.getResources()){
-            for (String key : resource.getCapabilities().keySet()) {
-                List<Map<String, Object>> contextDatas = resource.getCapabilities().get(key);
-                for (Map<String, Object> contextData : contextDatas) {
-                    for(String dataKey : contextData.keySet()) {
-                        if (values.contains(dataKey)) {
-                            PlotData data = new PlotData();
-                            data.setResource(map.get(resource.getUuid()));
-                            data.setCapability(key);
-                            data.setKey(dataKey);
-                            data.setValue(contextData.get(dataKey));
-                            plotDatas.add(data);
-                        }
-                    }
-                }
-            }
-        }
-
-        //val chart = new HorizontalBarChart1();
-
-
-        if (action.equals("Sum")) {
-            Map<String, Map<String, Map<String, Double>>> result = plotDatas.stream().collect(
-                    Collectors.groupingBy(PlotData::getCapability,
-                            Collectors.groupingBy(PlotData::getResource,
-                                    Collectors.groupingBy(PlotData::getKey,
-                                            Collectors.summingDouble(PlotData::getDoubleValue)))));
-            //createDatasetsDouble(resourceNames, capabilities, values, result, chart);
-        }
-        else if (action.equals("Count")) {
-            Map<String, Map<String, Map<String, Long>>> result = plotDatas.stream().collect(
-                    Collectors.groupingBy(PlotData::getCapability,
-                            Collectors.groupingBy(PlotData::getResource,
-                                    Collectors.groupingBy(PlotData::getKey,
-                                            Collectors.counting()))));
-            //createDatasetsLong(resourceNames, capabilities, values, result, chart);
-        }
-        else if (action.equals("Avg")) {
-            Map<String, Map<String, Map<String, Double>>> result = plotDatas.stream().collect(
-                    Collectors.groupingBy(PlotData::getCapability,
-                            Collectors.groupingBy(PlotData::getResource,
-                                    Collectors.groupingBy(PlotData::getKey,
-                                            Collectors.averagingDouble(PlotData::getDoubleValue)))));
-            //createDatasetsDouble(resourceNames, capabilities, values, result, chart);
-        }
-
-        String[] labels = resourceNames.toArray(new String[resourceNames.size()]);
-
-        //chart.setLabels(labels);
-        //chart.setTitle(title);
-        //chart.setYLabel("Value");
-
-        chartLayout.removeAllComponents();
-        //chartLayout.addComponent(chart.getChart());
-    }
-
     private void plotChartT(ListSelect<Resource> resourceListSelect,
                             ListSelect<String> capabilityListSelect,
                             String property, String action, String title) {
@@ -1165,7 +762,7 @@ public class ChartView extends VerticalLayout {
 
         val chart = new TimeLineChart();
 
-        if (action.equals("Sum")) {
+        if (action.equals(SummaryType.SUM)) {
             Map<String, Map<String, Map<String, Map<LocalDateTime, Double>>>> result = plotDatas.stream().collect(
                     Collectors.groupingBy(PlotData::getCapability,
                             Collectors.groupingBy(PlotData::getResource,
@@ -1174,7 +771,7 @@ public class ChartView extends VerticalLayout {
                                                     Collectors.summingDouble(PlotData::getDoubleValue))))));
             createDatasetsDoubleT(resourceNames, capabilities, values, result, chart);
         }
-        else if (action.equals("Count")) {
+        else if (action.equals(SummaryType.COUNT)) {
             Map<String, Map<String, Map<String, Map<LocalDateTime, Long>>>> result = plotDatas.stream().collect(
                     Collectors.groupingBy(PlotData::getCapability,
                             Collectors.groupingBy(PlotData::getResource,
@@ -1183,7 +780,7 @@ public class ChartView extends VerticalLayout {
                                                 Collectors.counting())))));
             createDatasetsLongT(resourceNames, capabilities, values, result, chart);
         }
-        else if (action.equals("Avg")) {
+        else if (action.equals(SummaryType.AVERAGE)) {
             Map<String, Map<String, Map<String, Map<LocalDateTime, Double>>>> result = plotDatas.stream().collect(
                     Collectors.groupingBy(PlotData::getCapability,
                             Collectors.groupingBy(PlotData::getResource,
@@ -1201,6 +798,12 @@ public class ChartView extends VerticalLayout {
 
         chartLayout.removeAllComponents();
         chartLayout.addComponent(chart.getChart());
+    }
+
+    private LocalDateTime getDate(String dataStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+        final ZonedDateTime parsed = ZonedDateTime.parse(dataStr, formatter.withZone(ZoneId.of("UTC")));
+        return parsed.toLocalDateTime();
     }
 
 }
