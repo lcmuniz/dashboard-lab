@@ -1,253 +1,193 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.view;
 
-import br.ufma.lsdi.dashboardlab.dashboardlab.chart.*;
-import br.ufma.lsdi.dashboardlab.dashboardlab.component.AppGson;
-import br.ufma.lsdi.dashboardlab.dashboardlab.model.Capability;
+import br.ufma.lsdi.dashboardlab.dashboardlab.chart.PieChart;
+import br.ufma.lsdi.dashboardlab.dashboardlab.chart.VerticalBarChart;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.SearchResourcesRequest;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
-import com.google.gson.Gson;
-import com.vaadin.shared.ui.MarginInfo;
+import com.byteowls.vaadin.chartjs.ChartJs;
+import com.vaadin.annotations.StyleSheet;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.*;
+import com.vaadin.ui.themes.ValoTheme;
 import io.vavr.control.Option;
 import lombok.val;
 import org.vaadin.addon.leaflet.LMap;
 import org.vaadin.addon.leaflet.LOpenStreetMapLayer;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+@StyleSheet("vaadin://styles1.css")
 public class IndexView extends VerticalLayout {
 
     private final InterSCityService interSCityService;
-
-    VerticalLayout capPerTypeLayout;
-    VerticalLayout resPerCapLayout;
-    VerticalLayout resPerCapTypeLayout;
-    ComboBox<String> queries;
-    LMap map;
-
-    double zoomLevel = 11.49;
 
     public IndexView(InterSCityService interSCityService, IndexUI indexUI) {
 
         this.interSCityService = interSCityService;
 
-        capPerTypeLayout = new VerticalLayout();
-        capPerTypeLayout.setSpacing(false);
-        capPerTypeLayout.setMargin(false);
-        //capPerTypeLayout.setSizeFull();
-        capPerTypeLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-
-        resPerCapLayout = new VerticalLayout();
-        resPerCapLayout.setSpacing(false);
-        resPerCapLayout.setMargin(false);
-        //resPerCapLayout.setSizeFull();
-        resPerCapLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-
-        resPerCapTypeLayout = new VerticalLayout();
-        resPerCapTypeLayout.setSpacing(false);
-        resPerCapTypeLayout.setMargin(false);
-        //resPerCapTypeLayout.setSizeFull();
-        resPerCapTypeLayout.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-
-        VerticalLayout formLayout = createFormPanel();
-
-        GridLayout statsGrid = new GridLayout(2,2);
-        statsGrid.setSizeFull();
-        statsGrid.addComponent(capPerTypeLayout);
-        statsGrid.addComponent(resPerCapLayout);
-        statsGrid.addComponent(formLayout);
-        //statsGrid.addComponent(resPerCapTypeLayout);
-
-        map = new LMap();
-        map.setCenter(-2.590479, -44.224759);
-        map.setZoomLevel(zoomLevel);
-        map.setSizeFull();
-        LOpenStreetMapLayer layer = new LOpenStreetMapLayer();
-        map.addBaseLayer(layer, "OSM");
-
-
-        GridLayout grid = new GridLayout(2,1);
+        GridLayout grid = new GridLayout(3,1);
         grid.setSizeFull();
-        grid.setColumnExpandRatio(0, 1);
-        grid.setColumnExpandRatio(0, 0.55f);
-        grid.setColumnExpandRatio(1, 0.45f);
-        grid.addComponent(statsGrid);
-        grid.addComponent(map);
-
-        initCharts();
+        grid.setColumnExpandRatio(0, 0.54f);
+        grid.setColumnExpandRatio(1, 0.01f);
+        grid.setColumnExpandRatio(2, 0.45f);
+        grid.addComponent(leftSide());
+        grid.addComponent(new Label(""));
+        grid.addComponent(rightSide());
 
         addComponent(grid);
 
         setWidth("100%");
         setHeight("100%");
 
-
     }
 
-    private void initCharts() {
-        plotCapabilitiesPerTypeChart();
-
-        val capabilities = interSCityService.getAllCapabilities(Option.none()).stream()
-                .map(Capability::getName)
-                .sorted();
-        String[] capabilitiesArr = capabilities.toArray(String[]::new);
-
-        Set<String> capabilitiesSet = new HashSet<String>();
-        Random rand = new Random();
-        int capNum = rand.nextInt(3) + 2;
-        for (int i = 0; i < capNum; i++) {
-            capabilitiesSet.add(capabilitiesArr[rand.nextInt(capabilitiesArr.length)]);
-        }
-
-        plotResourcesPerCapabilityChart(capabilitiesSet);
+    private Component leftSide() {
+        GridLayout statsGrid = new GridLayout(2,2);
+        statsGrid.setMargin(false);
+        statsGrid.setSpacing(true);
+        statsGrid.setSizeFull();
+        statsGrid.addComponent(panel00(), 0, 0);
+        statsGrid.addComponent(panel01(), 0, 1);
+        statsGrid.addComponent(panel10(), 1, 0);
+        statsGrid.addComponent(panel11(), 1, 1);
+        return statsGrid;
     }
 
-    private VerticalLayout createFormPanel() {
+    private Component rightSide() {
+        LMap map = new LMap();
+        map.setCenter(-2.590479, -44.224759);
+        map.setZoomLevel(11.49);
+        map.setSizeFull();
+        LOpenStreetMapLayer layer = new LOpenStreetMapLayer();
+        map.addBaseLayer(layer, "OSM");
 
-        val vl = new VerticalLayout();
+        VerticalLayout vl = new VerticalLayout();
+        vl.setMargin(false);
         vl.setSpacing(false);
-        vl.setMargin(false);
-
-        val form = new VerticalLayout();
-        form.setSizeFull();
-        form.setMargin(false);
-        form.setMargin(new MarginInfo(true,false,false,false));
-        form.setSpacing(false);
-
-        /*val queriesList = Arrays.asList(
-                "Capabilities per type",
-                "Resources per capability",
-                "Resources per capability type"
-        );*/
-        val queriesList = Arrays.asList(
-                "Resources per capability"
-        );
-
-        queries = new ComboBox<>("Queries");
-        queries.setItems(queriesList);
-        queries.setSizeFull();
-        queries.addValueChangeListener(e -> {
-            form.removeAllComponents();
-            form.addComponent(createFormQuery(queries.getValue()));
-        });
-
-        vl.addComponent(queries);
-        vl.addComponent(form);
-
+        vl.setSizeFull();
+        vl.addComponent(map);
         return vl;
     }
 
-    private VerticalLayout createFormQuery(String query) {
+    private Component panel00() {
 
-        if (query.equals("Capabilities per type")) {
-            return createCapabilitiesPerTypeForm();
-        }
-        else if (query.equals("Resources per capability")) {
-            return createResourcesPerCapabilityForm();
-        }
-        else if (query.equals("Resources per capability type")) {
-            return createResourcesPerCapabilityTypeForm();
-        }
+        Label saoluis = new Label("Cidade de São Luís", ContentMode.HTML);
+        saoluis.addStyleName("city");
+        saoluis.addStyleName(ValoTheme.LABEL_H1);
 
-        return null;
+        DateTimeFormatter dtfDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm");
+        LocalDateTime now = LocalDateTime.now();
+
+        Label dates = new Label(dtfDate.format(now) + " | " + dtfTime.format(now));
+
+        Label resourceLabel = new Label("266", ContentMode.HTML);
+        resourceLabel.addStyleName(ValoTheme.LABEL_H1);
+
+        Label capabilitiesLabel = new Label("12312", ContentMode.HTML);
+        capabilitiesLabel .addStyleName(ValoTheme.LABEL_H1);
+
+        HorizontalLayout hl1 = new HorizontalLayout();
+        hl1.setMargin(false);
+        hl1.setSpacing(false);
+        hl1.setSizeFull();
+        hl1.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        hl1.addComponents(resourceLabel, capabilitiesLabel);
+
+        HorizontalLayout hl2 = new HorizontalLayout();
+        hl2.setMargin(false);
+        hl2.setSpacing(false);
+        hl2.setSizeFull();
+        hl2.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        hl2.addComponents(new Label("Capabilities"), new Label("Resources"));
+
+        VerticalLayout vl = new VerticalLayout();
+        vl.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
+        vl.setMargin(false);
+        vl.setSpacing(false);
+        vl.addComponent(saoluis);
+        vl.addComponent(dates);
+        vl.addComponent(new Label(""));
+        vl.addComponents(hl1,hl2);
+
+        Panel panel = new Panel("General information".toUpperCase());
+        panel.setContent(vl);
+        panel.setSizeFull();
+
+        return panel;
+
     }
 
-    private VerticalLayout createCapabilitiesPerTypeForm() {
-        val vl = new VerticalLayout();
-        vl.setMargin(false);
-        Button b = new Button("Plot Chart");
-        b.addClickListener(e -> plotCapabilitiesPerTypeChart());
-        vl.addComponent(b);
-        return vl;
-    }
-
-    private VerticalLayout createResourcesPerCapabilityTypeForm() {
-        val vl = new VerticalLayout();
-        vl.setMargin(false);
-        Button b = new Button("Plot Chart");
-        b.addClickListener(e -> plotResourcesPerCapabilityTypeChart());
-        vl.addComponent(b);
-        return vl;
-    }
-
-    private VerticalLayout createResourcesPerCapabilityForm() {
-        val vl = new VerticalLayout();
-        //vl.setSpacing(false);
-        vl.setMargin(false);
+    private Component panel01() {
 
         val capabilities = interSCityService.getAllCapabilities(Option.none()).stream()
                 .map(cap -> cap.getName())
                 .sorted();
+        String[] capabilitiesArr = capabilities.toArray(size -> new String[size]);
 
-        ListSelect<String> select = new ListSelect<>("Capabilities");
-        select.setSizeFull();
-        select.setItems(capabilities);
-        vl.addComponent(select);
-        Button b = new Button("Plot Chart");
-        b.addClickListener(e -> plotResourcesPerCapabilityChart(select.getSelectedItems()));
-        vl.addComponent(b);
-        return vl;
-    }
-
-    private void plotResourcesPerCapabilityChart(Set<String> capabilities) {
-
-        ProgressBar spinner = new ProgressBar();
-        spinner.setIndeterminate(true);
-        resPerCapLayout.addComponent(spinner);
+        Set<String> capabilitiesSet = new HashSet<String>();
+        Random rand = new Random();
+        int capNum = rand.nextInt(4) + 2;
+        for (int i = 0; i < capNum; i++) {
+            capabilitiesSet.add(capabilitiesArr[rand.nextInt(capabilitiesArr.length)]);
+        }
 
         val chart = new VerticalBarChart();
-        chart.setTitle("Resources per capability".toUpperCase());
 
-        capabilities.stream().forEach(cap -> {
+        capabilitiesSet.stream().forEach(cap -> {
             val request = new SearchResourcesRequest();
             request.setCapability(cap);
             val resources = interSCityService.searchResources(request);
             resources.stream().forEach(res -> chart.addData("Resources", cap, (double) resources.size()));
         });
 
-        resPerCapLayout.removeAllComponents();
-        resPerCapLayout.addComponent(chart.getChart());
+        Panel panel = new Panel("Resources per capability".toUpperCase());
+        panel.setContent(chart.getChart());
+        panel.setSizeFull();
+
+        return panel;
     }
 
-    private void plotResourcesPerCapabilityTypeChart() {
+    private Component panel10() {
+        //int sensors = interSCityService.getAllCapabilities(Option.of("sensor")).size();
+        //int actuators = interSCityService.getAllCapabilities(Option.of("actuator")).size();
 
-        ProgressBar spinner = new ProgressBar();
-        spinner.setIndeterminate(true);
-        resPerCapTypeLayout.addComponent(spinner);
-
-        int sensors = interSCityService.getAllResourcesWithSensorCapabilities().size();
-        int actuators = interSCityService.getAllResourcesWithActuatorCapabilities().size();
+        int sensors = 95;
+        int actuators = 5;
 
         PieChart pieChart = new PieChart();
-        pieChart.setTitle(queries.getValue().toUpperCase());
         pieChart.addData("Sensors", (double) sensors);
         pieChart.addData("Actuators", (double) actuators);
 
-        resPerCapTypeLayout.removeAllComponents();
-        resPerCapTypeLayout.addComponent(pieChart.getChart());
+        Panel panel = new Panel("Capabilities per type".toUpperCase());
+        panel.setSizeFull();
+        Component chart = pieChart.getChart();
+        chart.setSizeFull();
+        panel.setContent(chart);
+
+        return panel;
     }
 
-    private void plotCapabilitiesPerTypeChart() {
+    private Component panel11() {
 
-        ProgressBar spinner = new ProgressBar();
-        spinner.setIndeterminate(true);
-        capPerTypeLayout.addComponent(spinner);
+        //int sensors = interSCityService.getAllResourcesWithSensorCapabilities().size();
+        //int actuators = interSCityService.getAllResourcesWithActuatorCapabilities().size();
 
-        int sensors = interSCityService.getAllCapabilities(Option.of("sensor")).size();
-        int actuators = interSCityService.getAllCapabilities(Option.of("actuator")).size();
+        int sensors = 90;
+        int actuators = 10;
 
         PieChart pieChart = new PieChart();
-        pieChart.setTitle("Capabilities per type".toUpperCase());
         pieChart.addData("Sensors", (double) sensors);
         pieChart.addData("Actuators", (double) actuators);
 
-        capPerTypeLayout.removeAllComponents();
-        capPerTypeLayout.addComponent(pieChart.getChart());
-
+        Panel panel = new Panel("Resources per capability type".toUpperCase());
+        panel.setContent(pieChart.getChart());
+        panel.setSizeFull();
+        return panel;
     }
 
 }

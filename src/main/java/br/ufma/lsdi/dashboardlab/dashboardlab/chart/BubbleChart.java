@@ -89,7 +89,7 @@ public class BubbleChart  {
                 y1 = map2.get(s1).getMax();
             }
 
-            data.add(new DataValue(s1, x1, y1, (double) dv.get(0).r));
+            data.add(new DataValue(s1, x1, y1, (double) dv.get(0).r / 1000));
             if (x1 < minx) minx = x1;
             if (x1 > maxx) maxx = x1;
             if (y1 < miny) miny = y1;

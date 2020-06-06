@@ -1,5 +1,6 @@
 package br.ufma.lsdi.dashboardlab.dashboardlab.chart;
 
+import br.ufma.lsdi.dashboardlab.dashboardlab.model.SummaryType;
 import com.byteowls.vaadin.chartjs.config.BarChartConfig;
 import com.byteowls.vaadin.chartjs.data.BarDataset;
 import com.byteowls.vaadin.chartjs.utils.ColorUtils;
@@ -11,6 +12,8 @@ import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public abstract class BarChart implements IBarChart {
 
@@ -50,15 +53,15 @@ public abstract class BarChart implements IBarChart {
                 if (groupType == null) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getAverage()));
                 }
-                else if (groupType.equals("Sum")) {
+                else if (groupType.equals(SummaryType.SUM)) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getSum()));
-                } else if (groupType.equals("Count")) {
+                } else if (groupType.equals(SummaryType.COUNT)) {
                     data.add(new DataValue(s1, s2, (double) map2.get(s2).getCount()));
-                } else if (groupType.equals("Avg")) {
+                } else if (groupType.equals(SummaryType.AVERAGE)) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getAverage()));
-                } else if (groupType.equals("Min")) {
+                } else if (groupType.equals(SummaryType.MIN)) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getMin()));
-                } else if (groupType.equals("Max")) {
+                } else if (groupType.equals(SummaryType.MAX)) {
                     data.add(new DataValue(s1, s2, map2.get(s2).getMax()));
                 }
                 else {
@@ -68,9 +71,9 @@ public abstract class BarChart implements IBarChart {
         }
 
         BarChartConfig config = new BarChartConfig();
-        List<String> labels = data.stream().map(d -> d.group).distinct().collect(Collectors.toList());
+        List<String> labels = data.stream().map(d -> d.group).distinct().collect(toList());
         config.data().labelsAsList(labels);
-        List<String> ds = data.stream().map(d -> d.dataset).distinct().collect(Collectors.toList());
+        List<String> ds = data.stream().map(d -> d.dataset).distinct().collect(toList());
         ds.stream().forEach(dst -> {
             BarDataset bd = new BarDataset();
             bd.label(dst);

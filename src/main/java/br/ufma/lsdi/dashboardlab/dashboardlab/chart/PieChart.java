@@ -72,7 +72,7 @@ public class PieChart {
         return config;
     }
 
-    public Component getChart() {
+    public ChartJs getChart() {
         PieChartConfig config = buildData();
         config.
                 options()
