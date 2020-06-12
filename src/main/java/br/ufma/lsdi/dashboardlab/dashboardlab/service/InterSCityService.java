@@ -17,7 +17,8 @@ import java.util.List;
 @Service
 public class InterSCityService {
 
-    String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
+    //String baseUrl = "http://cidadesinteligentes.lsdi.ufma.br/";
+    String baseUrl = "https://api.playground.interscity.org/";
 
     Gson gson = AppGson.get();
 
@@ -82,12 +83,14 @@ public class InterSCityService {
 
             val queryString = String.join("&", lst);
 
-            val url = baseUrl + "catalog/resources/search?" + queryString + "&page={page}";
+            val urlx = baseUrl + "catalog/resources/search?" + queryString + "&page={page}";
+            val url = urlx.replace(" ", "%20");
 
             val list = new ArrayList<Resource>();
             int i = 1;
             while (true) {
                 val url_ = url.replace("{page}", i+"");
+
                 val response = Unirest.get(url_)
                         .header("accept", "application/json")
                         //.header("content-type", "application/json")
@@ -112,7 +115,8 @@ public class InterSCityService {
 
         try {
 
-            val url = baseUrl + "catalog/resources/search?description="+description;
+            val urlx = baseUrl + "catalog/resources/search?description="+description;
+            val url = urlx.replace(" ", "%20");
             val list = new ArrayList<Resource>();
             int i = 1;
 
@@ -184,7 +188,8 @@ public class InterSCityService {
     public Capability getCapability(String name) {
 
         try {
-            val url = baseUrl + "/catalog/capabilities/{name}";
+            val urlx = baseUrl + "/catalog/capabilities/{name}";
+            val url = urlx.replace(" ", "%20");
 
             val response = Unirest.get(url)
                     .header("accept", "application/json")

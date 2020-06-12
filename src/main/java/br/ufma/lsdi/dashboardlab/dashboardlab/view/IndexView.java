@@ -4,7 +4,6 @@ import br.ufma.lsdi.dashboardlab.dashboardlab.chart.PieChart;
 import br.ufma.lsdi.dashboardlab.dashboardlab.chart.VerticalBarChart;
 import br.ufma.lsdi.dashboardlab.dashboardlab.model.SearchResourcesRequest;
 import br.ufma.lsdi.dashboardlab.dashboardlab.service.InterSCityService;
-import com.byteowls.vaadin.chartjs.ChartJs;
 import com.vaadin.annotations.StyleSheet;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.*;
@@ -45,6 +44,9 @@ public class IndexView extends VerticalLayout {
 
     }
 
+    // Lado esquerda da tela contém os quatro painéis
+    // General Information, Capabilities per Type,
+    // Resources per Capability e Resoures per Capability Type
     private Component leftSide() {
         GridLayout statsGrid = new GridLayout(2,2);
         statsGrid.setMargin(false);
@@ -57,6 +59,7 @@ public class IndexView extends VerticalLayout {
         return statsGrid;
     }
 
+    // Lado direito da tela contém o mapa (inicialmente mostrando São Luís)
     private Component rightSide() {
         LMap map = new LMap();
         map.setCenter(-2.590479, -44.224759);
@@ -73,7 +76,12 @@ public class IndexView extends VerticalLayout {
         return vl;
     }
 
+    // Painel General Information
+    // Mostra o número de recursos e capacidades cadastrados na plataforma
     private Component panel00() {
+
+        int capabilities = interSCityService.getAllCapabilities(Option.none()).size();
+        int resources = interSCityService.getAllResources().size();
 
         Label saoluis = new Label("Cidade de São Luís", ContentMode.HTML);
         saoluis.addStyleName("city");
@@ -85,10 +93,10 @@ public class IndexView extends VerticalLayout {
 
         Label dates = new Label(dtfDate.format(now) + " | " + dtfTime.format(now));
 
-        Label resourceLabel = new Label("266", ContentMode.HTML);
+        Label resourceLabel = new Label(resources+"", ContentMode.HTML);
         resourceLabel.addStyleName(ValoTheme.LABEL_H1);
 
-        Label capabilitiesLabel = new Label("12312", ContentMode.HTML);
+        Label capabilitiesLabel = new Label(capabilities+"", ContentMode.HTML);
         capabilitiesLabel .addStyleName(ValoTheme.LABEL_H1);
 
         HorizontalLayout hl1 = new HorizontalLayout();
@@ -103,7 +111,7 @@ public class IndexView extends VerticalLayout {
         hl2.setSpacing(false);
         hl2.setSizeFull();
         hl2.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
-        hl2.addComponents(new Label("Capabilities"), new Label("Resources"));
+        hl2.addComponents(new Label("Resources"), new Label("Capabilities"));
 
         VerticalLayout vl = new VerticalLayout();
         vl.setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
@@ -122,6 +130,7 @@ public class IndexView extends VerticalLayout {
 
     }
 
+    // Painel Resources per Capability
     private Component panel01() {
 
         val capabilities = interSCityService.getAllCapabilities(Option.none()).stream()
@@ -142,7 +151,7 @@ public class IndexView extends VerticalLayout {
             val request = new SearchResourcesRequest();
             request.setCapability(cap);
             val resources = interSCityService.searchResources(request);
-            resources.stream().forEach(res -> chart.addData("Resources", cap, (double) resources.size()));
+            resources.stream().forEach(res -> chart.addData("Resources", cap + " (" + resources.size() + ")", (double) resources.size()));
         });
 
         Panel panel = new Panel("Resources per capability".toUpperCase());
@@ -152,16 +161,15 @@ public class IndexView extends VerticalLayout {
         return panel;
     }
 
+    // Painel Capabilities per Type
+    // Mostra o número de capacidades cadastradas na plataforma por tipo (sensores e atuadores)
     private Component panel10() {
-        //int sensors = interSCityService.getAllCapabilities(Option.of("sensor")).size();
-        //int actuators = interSCityService.getAllCapabilities(Option.of("actuator")).size();
-
-        int sensors = 95;
-        int actuators = 5;
+        int sensors = interSCityService.getAllCapabilities(Option.of("sensor")).size();
+        int actuators = interSCityService.getAllCapabilities(Option.of("actuator")).size();
 
         PieChart pieChart = new PieChart();
-        pieChart.addData("Sensors", (double) sensors);
-        pieChart.addData("Actuators", (double) actuators);
+        pieChart.addData("Sensors ("+sensors+")", (double) sensors);
+        pieChart.addData("Actuators ("+actuators+")", (double) actuators);
 
         Panel panel = new Panel("Capabilities per type".toUpperCase());
         panel.setSizeFull();
@@ -172,17 +180,16 @@ public class IndexView extends VerticalLayout {
         return panel;
     }
 
+    // Painel Resources per Capability Type
+    // Mostra o número de recursos com cada tipo de capacidade (sensores e atuadores)
     private Component panel11() {
 
-        //int sensors = interSCityService.getAllResourcesWithSensorCapabilities().size();
-        //int actuators = interSCityService.getAllResourcesWithActuatorCapabilities().size();
-
-        int sensors = 90;
-        int actuators = 10;
+        int sensors = interSCityService.getAllResourcesWithSensorCapabilities().size();
+        int actuators = interSCityService.getAllResourcesWithActuatorCapabilities().size();
 
         PieChart pieChart = new PieChart();
-        pieChart.addData("Sensors", (double) sensors);
-        pieChart.addData("Actuators", (double) actuators);
+        pieChart.addData("Sensor Type (" + sensors + ")", (double) sensors);
+        pieChart.addData("Actuator Type (" + actuators + ")", (double) actuators);
 
         Panel panel = new Panel("Resources per capability type".toUpperCase());
         panel.setContent(pieChart.getChart());

@@ -140,7 +140,7 @@ public class CommonQueriesView extends VerticalLayout {
             val request = new SearchResourcesRequest();
             request.setCapability(cap);
             val resources = interSCityService.searchResources(request);
-            resources.stream().forEach(res -> chart.addData("Resources", cap, (double) resources.size()));
+            resources.stream().forEach(res -> chart.addData("Resources", cap + " ("+resources.size()+")", (double) resources.size()));
         });
 
         chartLayout.removeAllComponents();
@@ -158,8 +158,8 @@ public class CommonQueriesView extends VerticalLayout {
 
         PieChart pieChart = new PieChart();
         pieChart.setTitle(queries.getValue().toUpperCase());
-        pieChart.addData("Sensors", (double) sensors);
-        pieChart.addData("Actuators", (double) actuators);
+        pieChart.addData("Sensors ("+sensors+")", (double) sensors);
+        pieChart.addData("Actuators ("+actuators+")", (double) actuators);
 
         chartLayout.removeAllComponents();
         chartLayout.addComponent(pieChart.getChart());
@@ -176,8 +176,8 @@ public class CommonQueriesView extends VerticalLayout {
 
         PieChart pieChart = new PieChart();
         pieChart.setTitle(queries.getValue().toUpperCase());
-        pieChart.addData("Sensors", (double) sensors);
-        pieChart.addData("Actuators", (double) actuators);
+        pieChart.addData("Sensors ("+sensors+")", (double) sensors);
+        pieChart.addData("Actuators ("+actuators+")", (double) actuators);
 
         chartLayout.removeAllComponents();
         chartLayout.addComponent(pieChart.getChart());
