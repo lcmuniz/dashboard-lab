@@ -15,8 +15,8 @@ Como executar a aplicação:
   (ela possui o método main). O Spring Boot utiliza um Tomcat embarcado e a aplicação pode ser
   acessado usando a URL http://localhost:8080
   - Para executar na linha de comando, deve-se antes criar o .jar usando o comando
-  mvn package. Isto irá gerar um arquivo em target/dashboard-lab-0.0.1-SNAPSHOT.jar.
-  Para executar use o comando java -jar dashboard-lab-0.0.1-SNAPSHOT.jar.
+  `mvn package`. Isto irá gerar um arquivo em `target/dashboard-lab-0.0.1-SNAPSHOT.jar`.
+  Para executar use o comando `java -jar dashboard-lab-0.0.1-SNAPSHOT.jar`.
   
 
 Atualmente as funcionalidades implementadas são:
