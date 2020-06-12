@@ -131,6 +131,7 @@ public class IndexView extends VerticalLayout {
     }
 
     // Painel Resources per Capability
+    // Este painel mostra de 2 a 4 capacidades por vez, escolhidas aleatoriamente.
     private Component panel01() {
 
         val capabilities = interSCityService.getAllCapabilities(Option.none()).stream()

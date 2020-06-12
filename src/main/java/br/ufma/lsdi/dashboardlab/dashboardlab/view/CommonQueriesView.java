@@ -12,6 +12,7 @@ import lombok.val;
 import java.util.Arrays;
 import java.util.Set;
 
+// Esta tela mostra 4 consultas pré-construídas.
 public class CommonQueriesView extends VerticalLayout {
 
     private final InterSCityService interSCityService;
